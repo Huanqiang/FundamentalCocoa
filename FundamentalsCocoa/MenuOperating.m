@@ -52,8 +52,24 @@
     
     [codeTypeOperating dealWithCode:mainViewController.showCodeTextView.string];
     
+    [mainViewController dealWithToken:codeTypeOperating.tokenArr];
+    mainViewController.showResultTextView.string = [self dealWithFalseInfo:codeTypeOperating.falseWordArr];
+}
+
+- (NSString *)dealWithFalseInfo:(NSArray *)falseWordArr {
     
-    mainViewController.showResultTextView.string = mainViewController.showCodeTextView.string;
+    NSMutableString *falseInfoString = [NSMutableString string];
+    if ([falseWordArr count] != 0) {
+        [falseInfoString appendFormat:@"程序有错：\n"];
+        for (NSDictionary *falseDic in falseWordArr) {
+            [falseInfoString appendFormat:@"\t第%@行： 信息：%@\n", [falseDic objectForKey:@"rowNumber"], [falseDic objectForKey:@"name"]];
+        }
+    }else {
+        [falseInfoString appendString:@"暂无错误!"];
+    }
+    
+    
+    return falseInfoString;
 }
 
 

@@ -10,6 +10,10 @@
 
 @interface CodeTypeOperating : NSObject
 
+@property (nonatomic, strong) NSMutableArray *symbolArr;
+@property (nonatomic, strong) NSMutableArray *tokenArr;
+@property (nonatomic, strong) NSMutableArray *falseWordArr;
+
 - (void)dealWithCode:(NSString *)fileContext;
 
 @end

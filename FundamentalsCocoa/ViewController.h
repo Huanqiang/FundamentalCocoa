@@ -12,7 +12,10 @@
 
 @property (unsafe_unretained) IBOutlet NSTextView *showCodeTextView;
 @property (unsafe_unretained) IBOutlet NSTextView *showResultTextView;
+
 @property (weak) IBOutlet NSTableView *wordDistinguishResultTableView;
+
+- (void)dealWithToken:(NSArray *)tokens;
 
 @end
 
