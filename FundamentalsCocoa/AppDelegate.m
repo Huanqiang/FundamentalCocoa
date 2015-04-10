@@ -7,8 +7,11 @@
 //
 
 #import "AppDelegate.h"
+#import "ViewController.h"
 
-@interface AppDelegate ()
+@interface AppDelegate () {
+    NSWindow *window;
+}
 
 @end
 
@@ -16,10 +19,21 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
+    window = [NSApplication sharedApplication].windows[0];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
 }
+
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
+
+    if (!flag){
+        [self->window makeKeyAndOrderFront:self];
+        return YES;
+    }
+    return NO;
+}
+
 
 @end

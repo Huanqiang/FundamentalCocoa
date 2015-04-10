@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E66948A21AD4E51600CD9EE5 /* MenuOperating.m in Sources */ = {isa = PBXBuildFile; fileRef = E66948A11AD4E51600CD9EE5 /* MenuOperating.m */; };
+		E680A06C1AD50A820063C2C5 /* CodeTypeClass.m in Sources */ = {isa = PBXBuildFile; fileRef = E680A06B1AD50A820063C2C5 /* CodeTypeClass.m */; };
+		E680A0711AD51D980063C2C5 /* CodeTypeOperating.m in Sources */ = {isa = PBXBuildFile; fileRef = E680A0701AD51D980063C2C5 /* CodeTypeOperating.m */; };
+		E699C88B1AD4253600CD96C8 /* FundamentalsResultPanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E699C8891AD4253600CD96C8 /* FundamentalsResultPanelViewController.m */; };
+		E699C8911AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E699C8901AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib */; };
 		E6F034701AD39FA4002B6B65 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F0346F1AD39FA4002B6B65 /* AppDelegate.m */; };
 		E6F034721AD39FA4002B6B65 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F034711AD39FA4002B6B65 /* main.m */; };
 		E6F034751AD39FA5002B6B65 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F034741AD39FA5002B6B65 /* ViewController.m */; };
@@ -26,6 +31,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E66948A01AD4E51600CD9EE5 /* MenuOperating.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuOperating.h; sourceTree = "<group>"; };
+		E66948A11AD4E51600CD9EE5 /* MenuOperating.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuOperating.m; sourceTree = "<group>"; };
+		E680A06A1AD50A820063C2C5 /* CodeTypeClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodeTypeClass.h; sourceTree = "<group>"; };
+		E680A06B1AD50A820063C2C5 /* CodeTypeClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodeTypeClass.m; sourceTree = "<group>"; };
+		E680A06F1AD51D980063C2C5 /* CodeTypeOperating.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodeTypeOperating.h; sourceTree = "<group>"; };
+		E680A0701AD51D980063C2C5 /* CodeTypeOperating.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodeTypeOperating.m; sourceTree = "<group>"; };
+		E699C8881AD4253600CD96C8 /* FundamentalsResultPanelViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FundamentalsResultPanelViewController.h; sourceTree = "<group>"; };
+		E699C8891AD4253600CD96C8 /* FundamentalsResultPanelViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FundamentalsResultPanelViewController.m; sourceTree = "<group>"; };
+		E699C8901AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FundamentalsResultPanelViewController.xib; sourceTree = "<group>"; };
 		E6F034691AD39FA4002B6B65 /* FundamentalsCocoa.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FundamentalsCocoa.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6F0346D1AD39FA4002B6B65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E6F0346E1AD39FA4002B6B65 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -58,6 +72,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E680A0681AD4FF6A0063C2C5 /* Fundamentals Result View Controller */ = {
+			isa = PBXGroup;
+			children = (
+				E699C8881AD4253600CD96C8 /* FundamentalsResultPanelViewController.h */,
+				E699C8891AD4253600CD96C8 /* FundamentalsResultPanelViewController.m */,
+				E699C8901AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib */,
+			);
+			name = "Fundamentals Result View Controller";
+			sourceTree = "<group>";
+		};
+		E680A0691AD5089D0063C2C5 /* Code Type  */ = {
+			isa = PBXGroup;
+			children = (
+				E680A06A1AD50A820063C2C5 /* CodeTypeClass.h */,
+				E680A06B1AD50A820063C2C5 /* CodeTypeClass.m */,
+				E680A06F1AD51D980063C2C5 /* CodeTypeOperating.h */,
+				E680A0701AD51D980063C2C5 /* CodeTypeOperating.m */,
+			);
+			name = "Code Type ";
+			sourceTree = "<group>";
+		};
 		E6F034601AD39FA4002B6B65 = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +114,9 @@
 		E6F0346B1AD39FA4002B6B65 /* FundamentalsCocoa */ = {
 			isa = PBXGroup;
 			children = (
+				E680A0691AD5089D0063C2C5 /* Code Type  */,
+				E680A0681AD4FF6A0063C2C5 /* Fundamentals Result View Controller */,
+				E6F034921AD3ABCC002B6B65 /* Menu */,
 				E6F0346E1AD39FA4002B6B65 /* AppDelegate.h */,
 				E6F0346F1AD39FA4002B6B65 /* AppDelegate.m */,
 				E6F034731AD39FA5002B6B65 /* ViewController.h */,
@@ -114,6 +152,15 @@
 				E6F034841AD39FA5002B6B65 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E6F034921AD3ABCC002B6B65 /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				E66948A01AD4E51600CD9EE5 /* MenuOperating.h */,
+				E66948A11AD4E51600CD9EE5 /* MenuOperating.m */,
+			);
+			name = Menu;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -198,6 +245,7 @@
 			files = (
 				E6F034771AD39FA5002B6B65 /* Images.xcassets in Resources */,
 				E6F0347A1AD39FA5002B6B65 /* Main.storyboard in Resources */,
+				E699C8911AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,8 +264,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				E6F034751AD39FA5002B6B65 /* ViewController.m in Sources */,
+				E66948A21AD4E51600CD9EE5 /* MenuOperating.m in Sources */,
 				E6F034721AD39FA4002B6B65 /* main.m in Sources */,
+				E680A0711AD51D980063C2C5 /* CodeTypeOperating.m in Sources */,
+				E699C88B1AD4253600CD96C8 /* FundamentalsResultPanelViewController.m in Sources */,
 				E6F034701AD39FA4002B6B65 /* AppDelegate.m in Sources */,
+				E680A06C1AD50A820063C2C5 /* CodeTypeClass.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -404,6 +456,7 @@
 				E6F0348B1AD39FA5002B6B65 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E6F0348C1AD39FA5002B6B65 /* Build configuration list for PBXNativeTarget "FundamentalsCocoaTests" */ = {
 			isa = XCConfigurationList;
@@ -412,6 +465,7 @@
 				E6F0348E1AD39FA5002B6B65 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
