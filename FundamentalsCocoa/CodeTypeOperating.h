@@ -15,5 +15,7 @@
 @property (nonatomic, strong) NSMutableArray *falseWordArr;
 
 - (void)dealWithCode:(NSString *)fileContext;
+- (void)saveSymbolToFile;
+- (void)saveTokenToFile;
 
 @end

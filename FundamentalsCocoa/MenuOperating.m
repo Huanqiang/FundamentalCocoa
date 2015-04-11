@@ -49,13 +49,22 @@
     ViewController *mainViewController = (ViewController *)[self gainMainViewController].contentViewController;
     CodeTypeOperating *codeTypeOperating = [[CodeTypeOperating alloc] init];
     
-    
+    // 进行 词法分析
     [codeTypeOperating dealWithCode:mainViewController.showCodeTextView.string];
     
+    // 将 词法分析 的正确部分 放到主界面的相应位置
     [mainViewController dealWithToken:codeTypeOperating.tokenArr];
+    
+    // 将 词法分析 的错误部分 放到主界面的相应位置
     mainViewController.showResultTextView.string = [self dealWithFalseInfo:codeTypeOperating.falseWordArr];
+    
+    // 保存 至 文件
+    [codeTypeOperating saveSymbolToFile];
+    [codeTypeOperating saveTokenToFile];
 }
 
+
+// 处理错误信息
 - (NSString *)dealWithFalseInfo:(NSArray *)falseWordArr {
     
     NSMutableString *falseInfoString = [NSMutableString string];
