@@ -198,15 +198,17 @@
     
     if (nextChar == '/') {     // 如果下一个字符是 '/'，表明接下来的整行都是注释
         index = (int)[fileContextOfRow length];
-    }else if (nextChar == '*') {    // 如果下一个字符是 '*'，表明接下来的都是注释 直到遇到下一个 '*/'， 过了本行后不视为注释
-        for (; index < [fileContextOfRow length]; index++) {
-            char currentChar = [fileContextOfRow characterAtIndex:index];
+    }else if (nextChar == '*') {
+        // 如果下一个字符是 '*'，表明接下来的都是注释 直到遇到下一个 '*/'， 过了本行后不视为注释
+        for (++index; index < [fileContextOfRow length]; index++) {
+            char currentAnnotationChar = [fileContextOfRow characterAtIndex:index];
             if (index == ([fileContextOfRow length] - 1)) {
                 index = (int)[fileContextOfRow length];
                 break;
             }
-            char currentNewxChar = [fileContextOfRow characterAtIndex:index + 1];
-            if (currentChar == '*' && currentNewxChar == '/') {
+            char currentNextAnnotationChar = [fileContextOfRow characterAtIndex:(index + 1)];
+            if (currentAnnotationChar == '*' && currentNextAnnotationChar == '/') {
+                index = index + 2;
                 // 表示注释结束
                 break;
             }
@@ -283,9 +285,10 @@
 }
 
 - (void)saveToToken:(NSDictionary *)token {
-    if (![tokenArr containsObject:token]) {
-        [tokenArr addObject:token];
-    }
+//    if (![tokenArr containsObject:token]) {
+//        [tokenArr addObject:token];
+//    }
+    [tokenArr addObject:token];
 }
 
 - (void)saveToFalse:(NSString *)wordName rowNumber:(NSInteger)row {
