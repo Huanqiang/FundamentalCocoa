@@ -100,14 +100,56 @@
     NSMutableString *phrase = [NSMutableString string];
     for (; index < [fileContextOfRow length]; index++) {
         char currentChar = [fileContextOfRow characterAtIndex:index];
+//        if (![codeTypeClass isBelongsNumber:currentChar] && currentChar != 'E' && currentChar != '.') {
+//            break;
+//        }
         if (![codeTypeClass isBelongsNumber:currentChar]) {
-            break;
+            if (currentChar == 'E' && (index < [fileContextOfRow length])) {
+                char nextChar = [fileContextOfRow characterAtIndex:index + 1];
+                if (![codeTypeClass isBelongsNumber:nextChar]) {
+                    if (nextChar != '-' && nextChar != '+') {
+                        break;
+                    }else {
+                        if (index + 2 < [fileContextOfRow length]) {
+                            char nextNextChar = [fileContextOfRow characterAtIndex:index + 2];
+                            if ([codeTypeClass isBelongsNumber:nextNextChar]) {
+                                [phrase appendFormat:@"%c", currentChar];
+                                [phrase appendFormat:@"%c", nextChar];
+                                [phrase appendFormat:@"%c", nextNextChar];
+                                index +=2;
+                            }else {
+                                break;
+                            }
+                        }else {
+                            break;
+                        }
+                    }
+                }else {
+                    [phrase appendFormat:@"%c", currentChar];
+                    [phrase appendFormat:@"%c", nextChar];
+                    index += 1;
+                }
+            }else {
+                if (currentChar == '.' && (index != [fileContextOfRow length] - 1)) {
+                    char nextChar = [fileContextOfRow characterAtIndex:index + 1];
+                    if (![codeTypeClass isBelongsNumber:nextChar]) {
+                        break;
+                    }else {
+                        [phrase appendFormat:@"%c", currentChar];
+                        [phrase appendFormat:@"%c", nextChar];
+                        index += 1;
+                    }
+                }else {
+                    break;
+                }
+            }
+        }else {
+            [phrase appendFormat:@"%c", currentChar];
         }
-        [phrase appendFormat:@"%c", currentChar];
     }
     
     NSString *numberType;
-    if ([phrase rangeOfString:@"."].length == 0) {
+    if (([phrase rangeOfString:@"."].length == 0) && ([phrase rangeOfString:@"E"].length == 0) ) {
         numberType = @"整型";
     }else {
         numberType = @"浮点型";
@@ -229,8 +271,12 @@
 // 当第一个字符是 运算符 的时候， 判断是不是 词组是不是运算符
 - (int)phraseIsBelongsOperator:(NSString *)fileContextOfRow index:(int)index row:(NSInteger)row {
     char currentChar = [fileContextOfRow characterAtIndex:index];
-    char nextChar = [fileContextOfRow characterAtIndex:++index];
-    NSString *phrase = [NSString stringWithFormat:@"%c%c", currentChar, nextChar];
+    NSString *phrase = [NSString stringWithFormat:@"%c", currentChar];
+    if (index != [fileContextOfRow length] - 1) {
+        char nextChar = [fileContextOfRow characterAtIndex:++index];
+        phrase = [NSString stringWithFormat:@"%c%c", currentChar, nextChar];
+    }
+    
     
     if ([codeTypeClass isBelongsOperatorArray:phrase] != -1) {
         index++;
@@ -263,18 +309,21 @@
 #pragma mark - 处理结果
 // 创建 正确单词 字典
 - (NSDictionary *)createRightWord:(NSString *)wordName codeType:(NSInteger)codeType rowNumber:(NSInteger)row {
-    return @{@"name": wordName, @"token": @(codeType), @"rowNumber": @(row)};
+    return @{@"name": wordName, @"token": @(codeType), @"rowNumber": @(row + 1)};
 }
 
 
 // 创建 错误单词 （字典）
 - (NSDictionary *)createFalseWord:(NSString *)wordName rowNumber:(NSInteger)row {
-    return @{@"name": wordName, @"rowNumber": @(row)};
+    return @{@"name": wordName, @"rowNumber": @(row + 1)};
 }
 
 // 创建 符号表内容 字典
 - (NSDictionary *)createSymbolWord:(NSString *)wordName token:(NSInteger)token type:(NSString *)type {
-    return @{@"name": wordName, @"length": @([wordName length]), @"token": @(token), @"type": type};
+    if ([type isEqualToString:@"整型"] || [type isEqualToString:@"浮点型"]) {
+        return @{@"name": wordName, @"length": @(1), @"token": @(token + 1), @"type": type};
+    }
+    return @{@"name": wordName, @"length": @([wordName length]), @"token": @(token + 1), @"type": type};
 }
 
 // 最后处理操作
