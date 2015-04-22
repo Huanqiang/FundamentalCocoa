@@ -377,9 +377,15 @@
                                     <items>
                                         <menuItem title="语法分析器" keyEquivalent="s" id="YQM-9d-j61">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="grammaticalAnalysis:" target="mb5-bQ-r35" id="pdu-6B-SOK"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem title="LL(1)预测分析" keyEquivalent="p" id="yRm-3z-I03">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="LLFirstForecastAnalyse:" target="mb5-bQ-r35" id="C2M-Lg-hHG"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem title="运算符优先" keyEquivalent="o" id="W3I-B9-oL5">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES"/>

@@ -14,5 +14,7 @@
 - (IBAction)openNewFundamenttals:(id)sender;
 - (IBAction)lexicalAnalysis:(id)sender;
 - (IBAction)fundamentalCode:(id)sender;
+- (IBAction)LLFirstForecastAnalyse:(id)sender;
+- (IBAction)grammaticalAnalysis:(id)sender;
 
 @end

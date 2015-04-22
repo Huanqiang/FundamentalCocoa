@@ -7,12 +7,24 @@
 //
 
 #import "MenuOperating.h"
+
+// 打开文件操作类
+#import "FileOperateClass.h"
+
+// 词法分析
 #import "CodeTypeOperating.h"
+
+// 语法分析
+#import "GrammaticalAnalysisClass.h"
+
+// 框体类
 #import "ViewController.h"
 #import "FundamentalsResultPanelViewController.h"
+#import "LLFirstForecast.h"
 
 @interface MenuOperating () {
     FundamentalsResultPanelViewController *fundamentalsResultViewController;
+    LLFirstForecast *llFirstForecastViewController;
 }
 
 @end
@@ -22,31 +34,17 @@
 
 #pragma mark - 打开文件
 - (IBAction)openNewFundamenttals:(id)sender {
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel setPrompt: @"打开"];
-    
-    openPanel.allowedFileTypes = [NSArray arrayWithObjects: @"txt", @"doc", nil];
-    openPanel.directoryURL = nil;
-    
-    [openPanel beginSheetModalForWindow:[self gainMainViewController] completionHandler:^(NSModalResponse returnCode) {
-        
-        if (returnCode == 1) {
-            NSURL *fileUrl = [[openPanel URLs] objectAtIndex:0];
-            // 获取文件内容
-            NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingFromURL:fileUrl error:nil];
-            NSString *fileContext = [[NSString alloc] initWithData:fileHandle.readDataToEndOfFile encoding:NSUTF8StringEncoding];
-            
-            // 将 获取的数据传递给 ViewController 的 TextView
-            ViewController *mainViewController = (ViewController *)[self gainMainViewController].contentViewController;
-            mainViewController.showCodeTextView.string = fileContext;
-        }
+    [[[FileOperateClass alloc] init] openFileWithSelectFolder:[self gainMainWindowController] gainData:^(NSString *result) {
+        // 将 获取的数据传递给 ViewController 的 TextView
+        ViewController *mainViewController = [self gainMainViewController];
+        mainViewController.showCodeTextView.string = result;
     }];
 }
 
 #pragma mark - 词法分析
 - (IBAction)lexicalAnalysis:(id)sender {
     // 将 获取的数据传递给 ViewController 的 TextView
-    ViewController *mainViewController = (ViewController *)[self gainMainViewController].contentViewController;
+    ViewController *mainViewController = [self gainMainViewController];
     CodeTypeOperating *codeTypeOperating = [[CodeTypeOperating alloc] init];
     
     // 进行 词法分析
@@ -84,8 +82,7 @@
 
 #pragma mark - 编译
 - (IBAction)fundamentalCode:(id)sender {
-    ViewController *mainViewController = (ViewController *)[self gainMainViewController].contentViewController;
-    
+    ViewController *mainViewController = [self gainMainViewController];
     
     if (!fundamentalsResultViewController) {
         fundamentalsResultViewController = [[FundamentalsResultPanelViewController alloc] initWithWindowNibName:@"FundamentalsResultPanelViewController"];
@@ -95,9 +92,29 @@
     fundamentalsResultViewController.showFunResultTextView.string = mainViewController.showCodeTextView.string;
 }
 
+#pragma mark - LL1 预测分析
+- (IBAction)LLFirstForecastAnalyse:(id)sender {
+    if (!llFirstForecastViewController) {
+        llFirstForecastViewController = [[LLFirstForecast alloc] initWithWindowNibName:@"LLFirstForecast"];
+    }
+    [llFirstForecastViewController showWindow:self];
+}
+
+
+#pragma mark - 语法 分析
+- (IBAction)grammaticalAnalysis:(id)sender {
+    // 将 获取的数据传递给 ViewController 的 TextView
+    ViewController *mainViewController = [self gainMainViewController];
+    GrammaticalAnalysisClass *grammaticalAnalysis = [[GrammaticalAnalysisClass alloc] init];
+}
+
 
 #pragma mark - 私有方法 
--(NSWindow *)gainMainViewController {
+- (ViewController *)gainMainViewController {
+    return (ViewController *)[self gainMainWindowController].contentViewController;
+}
+
+-(NSWindow *)gainMainWindowController {
     return [NSApplication sharedApplication].windows[0];
 
 }
