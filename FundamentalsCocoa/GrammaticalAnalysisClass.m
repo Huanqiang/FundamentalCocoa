@@ -10,4 +10,8 @@
 
 @implementation GrammaticalAnalysisClass
 
+- (void)grammaticalAnalysis:(NSString *)fileContext {
+    
+}
+
 @end

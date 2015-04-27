@@ -10,4 +10,6 @@
 
 @interface GrammaticalAnalysisClass : NSObject
 
+- (void)grammaticalAnalysis:(NSString *)fileContext;
+
 @end

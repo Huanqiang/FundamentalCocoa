@@ -9,7 +9,9 @@
 #import "LLFirstForecast.h"
 #import "FileOperateClass.h"
 
-@interface LLFirstForecast ()
+@interface LLFirstForecast () {
+    NSDictionary *firstCollectionDictionary;
+}
 
 @property (unsafe_unretained) IBOutlet NSTextView *grammarDataTextView;
 @property (unsafe_unretained) IBOutlet NSTextView *firstCollectionResultTextView;
@@ -21,6 +23,8 @@
 
 - (void)windowDidLoad {
     [super windowDidLoad];
+    
+    firstCollectionDictionary = [NSDictionary dictionary];
     
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
@@ -157,18 +161,18 @@
         [firstCollection setValue:[self removeRepetitionSignal:key firstCollection:firstCollection] forKey:key];
     }
     
+    firstCollectionDictionary = [NSDictionary dictionaryWithDictionary:firstCollection];
     // 最后进行文法的 展示
-    [self fileContextShow:firstCollection];
+    self.firstCollectionResultTextView.string = [self fileContextShow:firstCollection];
 }
 
-// 分离数据（依据：-> 和 |）
+// 获取 first集 每一个结束符的第一个字符，并组成字典类型
 - (NSDictionary *)separateFirstCollection:(NSString *)rowContext {
-    // 先根据 -> 分离 起始符
-    NSArray *arrowHeadArr = [rowContext componentsSeparatedByString:@"->"];
+    NSArray *arrowHeadArr = [self separateCollection:rowContext];
     
     // 获取每一个 结束符的 第一个符号
     NSMutableArray *endSignals = [NSMutableArray array];
-    for (NSString *signal in [arrowHeadArr[1] componentsSeparatedByString:@"|"]) {
+    for (NSString *signal in arrowHeadArr[1]) {
         [endSignals addObject:[NSString stringWithFormat:@"%c", [signal characterAtIndex:0]]];
     }
     
@@ -177,7 +181,18 @@
     return @{arrowHeadArr[0]: @{@"IsFinish": @(0), @"EndSignalValues":endSignals}};
 }
 
-// 数据处理
+// 分离数据（依据：-> 和 |）
+- (NSArray *)separateCollection:(NSString *)rowContext {
+    // 先根据 -> 分离 起始符
+    NSArray *arrowHeadArr = [rowContext componentsSeparatedByString:@"->"];
+    NSArray *orSignalsArr = [arrowHeadArr[1] componentsSeparatedByString:@"|"];
+
+    return @[arrowHeadArr[0], orSignalsArr];
+}
+
+
+
+// first集 数据处理
 - (NSDictionary *)dealWithFirstCollection:(NSString *)key firstCollection:(NSMutableDictionary *)firstCollection {
     NSArray *keys = [firstCollection allKeys];
     NSArray *values = [[firstCollection objectForKey:key] objectForKey:@"EndSignalValues"];
@@ -220,7 +235,7 @@
 }
 
 // 数据展示
-- (void)fileContextShow:(NSDictionary *)firstCollection {
+- (NSString *)fileContextShow:(NSDictionary *)firstCollection {
     NSMutableString *newFileContext = [NSMutableString string];
     NSArray *keys = [firstCollection allKeys];
     
@@ -241,15 +256,200 @@
         [newFileContext appendFormat:@"%@ 的first集为：{%@}\n", key, allValue];
     }
     
-    self.firstCollectionResultTextView.string = newFileContext;
+    return newFileContext;
+    
 }
 
 #pragma mark - 求 follow 集
 - (IBAction)foundFollowCollection:(id)sender {
+    NSString *fileContext = self.grammarDataTextView.string;
+    NSDictionary *baseFollowCollectionData = [self separateFollowCollection:fileContext];
+    NSMutableDictionary *followCollection = [self createFollowCollectionData:baseFollowCollectionData];
+    
+    // 获取开始字符
+    NSString *startSignal = [NSString stringWithFormat:@"%c", [fileContext characterAtIndex:0]];
+    
+    // 按规则进行处理
+    for (NSString *key in [followCollection allKeys]) {
+        // 判断是不是 开始符号
+        [self dealWithFirstRule:followCollection currentKey:key startSignal:startSignal];
+        
+        // 进行 剩余3个规则 的判断
+        [self dealWithOtherRule:followCollection currentKey:key baseFollowCollectionData:baseFollowCollectionData];
+    }
+    
+    // 将 FollowX 替换成 相应的 Follow 集
+    // 循环处理： 只要有一个 起始符对应的终结符的集合中 含有起始符， 就要进行一次循环， 直到完成所有的循环。
+    while (![self isFinishWithFirstCollection:followCollection]) {
+        NSArray *keys = [followCollection allKeys];
+        for (NSString *key in keys) {
+            if ([[[followCollection objectForKey:key] objectForKey:@"IsFinish"] isEqualTo: @(0)]) {
+                [followCollection setValue:[self replaceFollowCollectionFolloWX:followCollection currentKey:key] forKey:key];
+                
+            }
+        }
+    }
+    
+    // 去除 终结符集合中的 重复的 符号
+    NSArray *keys = [followCollection allKeys];
+    for (NSString *key in keys) {
+        [followCollection setValue:[self removeRepetitionSignal:key firstCollection:followCollection] forKey:key];
+    }
+
+    self.followCollectionResultTextView.string = [self fileContextShow:followCollection];
     
 }
 
+// 获取follow集的基础数据
+- (NSDictionary *)separateFollowCollection:(NSString *)fileContext {
+    NSArray *fileContextArr = [self separateFileContextWithRow:fileContext];
+    NSMutableDictionary *baseFollowCollectionData = [NSMutableDictionary dictionary];
+    
+    // 获取 起始符 和 起对应的终结符（箭头的右侧）
+    for (NSString *rowContext in fileContextArr) {
+        if (![rowContext isEqualToString:@""]) {
+            NSArray *arrowHeadArr = [self separateCollection:rowContext];
+            [baseFollowCollectionData setObject:arrowHeadArr[1] forKey:arrowHeadArr[0]];
+        }
+    }
+    // 将每一个起始符 和 其结束符分离
+    return baseFollowCollectionData;
+}
 
+// 建立 follow集的 结束符数据
+- (NSMutableDictionary *)createFollowCollectionData:(NSDictionary *)baseFollowCollectionData {
+    NSMutableDictionary *followCollection  = [NSMutableDictionary dictionary];
+    
+    for (NSString *key in [baseFollowCollectionData allKeys]) {
+        // IsFinish： 1表示完成 0表示未完成
+        [followCollection setValue:@{@"IsFinish": @(0), @"EndSignalValues":@[]} forKey:key];
+    }
+    
+    return followCollection;
+}
+
+// 确定开始符号
+- (BOOL)dealWithFirstRule:(NSMutableDictionary *)followCollection currentKey:(NSString *)currentKey startSignal:(NSString *)startSignal {
+    
+    if ([currentKey isEqualToString:startSignal]) {
+       [self saveFollowCollectionData:followCollection currentKey:currentKey followChar:@"#"];
+        return YES;
+    }
+    
+    return NO;
+}
+
+// 进行规则2、3、4的判断
+- (void)dealWithOtherRule:(NSMutableDictionary *)followCollection currentKey:(NSString *)currentKey baseFollowCollectionData:(NSDictionary *)baseFollowCollectionData {
+    
+    // 循环整个字典
+    for (NSString *key in [baseFollowCollectionData allKeys]) {
+        NSArray *BaseEndSignalValues = [baseFollowCollectionData objectForKey:key];
+        
+        // 循环每一个的结束符
+        for (NSString *value in BaseEndSignalValues) {
+            // 按规则要求进行每一个字符的判断
+            for (int i = 0; i < [value length]; i++) {
+                NSString *currentChar = [NSString stringWithFormat:@"%c", [value characterAtIndex:i]];
+                // 进行规则2、3、4的判断
+                if ([currentKey isEqualToString:currentChar]) {
+                    // 进行第4条规则的判断
+                    if (i == [value length] - 1) {
+                        [self dealWithFourthRule:followCollection currentKey:currentKey followChar:key];
+                    }else {
+                        NSString *nextChar = [NSString stringWithFormat:@"%c", [value characterAtIndex:i + 1]];
+                        // 判断下一个字符是不是 起始符 或者 空字符（$），如果是运用第三、四条规则，不是则运用第二条规则。
+                        int nextCharIsKey = NO;
+                        for (NSString *key in [baseFollowCollectionData allKeys]) {
+                            if ([nextChar isEqualToString:key]) {
+                                nextCharIsKey = YES;
+                            }
+                        }
+                        
+                        if (nextCharIsKey) {
+                            // 处理第三条规则
+                            [self dealWithThirdRule:followCollection currentKey:currentKey followChar:nextChar];
+                            
+                            // 处理第四条规则
+                            NSArray *nextCharEndValues = [baseFollowCollectionData objectForKey:nextChar];
+                            for (NSString *value in nextCharEndValues) {
+                                if ([value isEqualToString:@"$"]) {
+                                    [self dealWithFourthRule:followCollection currentKey:currentKey followChar:key];
+                                }
+                            }
+                        }else {
+                            // 第二条规则
+                            [self dealWithSecondRule:followCollection currentKey:currentKey followChar:nextChar];
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 规则2 结果处理
+- (void)dealWithSecondRule:(NSMutableDictionary *)followCollection currentKey:(NSString *)currentKey followChar:(NSString *)followChar  {
+    [self saveFollowCollectionData:followCollection currentKey:currentKey followChar:followChar];
+}
+
+// 规则3 结果处理
+- (void)dealWithThirdRule:(NSMutableDictionary *)followCollection currentKey:(NSString *)currentKey followChar:(NSString *)followChar {
+    // 获取 first集
+    NSArray *firtCollectionValues = [firstCollectionDictionary objectForKey:followChar];
+    for (NSString *value in firtCollectionValues) {
+        if (![value isEqualToString:@"$"]) {
+            [self saveFollowCollectionData:followCollection currentKey:currentKey followChar:value];
+        }
+    }
+}
+
+// 规则4 结果处理
+- (void)dealWithFourthRule:(NSMutableDictionary *)followCollection currentKey:(NSString *)currentKey followChar:(NSString *)followChar {
+    [self saveFollowCollectionData:followCollection currentKey:currentKey followChar:[NSString stringWithFormat:@"Follow%@", followChar]];
+}
+
+// 将 FollowX 替换成 相应的 Follow 集
+- (NSDictionary *)replaceFollowCollectionFolloWX:(NSMutableDictionary *)followCollection currentKey:(NSString *)currentKey {
+    NSArray *values = [[followCollection objectForKey:currentKey] objectForKey:@"EndSignalValues"];
+    NSMutableArray *newValues = [NSMutableArray arrayWithArray:[[followCollection objectForKey:currentKey] objectForKey:@"EndSignalValues"]];
+    NSNumber *isFinish = @(1);
+    
+    for (NSString *value in values) {
+        if ([value hasPrefix:@"Follow"]) {
+            NSString *key = [NSString stringWithFormat:@"%c",[value characterAtIndex:6]];
+            isFinish = @(0);
+            [newValues removeObject:value];
+            [newValues addObjectsFromArray:[[[followCollection objectForKey:key] objectForKey:@"EndSignalValues"] copy]];
+        }
+    }
+    
+    NSMutableArray *newValuesNoSelf = [NSMutableArray array];
+    // 去除本身的 Follow 集
+    for (NSString *value in newValues) {
+        if (![value isEqualToString:[NSString stringWithFormat:@"Follow%@",currentKey]]) {
+            [newValuesNoSelf addObject:value];
+        }
+    }
+    
+    return @{@"IsFinish": isFinish, @"EndSignalValues": newValuesNoSelf};
+}
+
+
+
+// 保存 新数据 至 follow 集
+- (void)saveFollowCollectionData:(NSMutableDictionary *)followCollection currentKey:(NSString *)currentKey followChar:(NSString *)followChar  {
+    NSMutableArray *EndSignalValues = [self valuesAddObject:[[followCollection objectForKey:currentKey] objectForKey:@"EndSignalValues"] newChar:followChar];
+    
+    [followCollection setObject:@{@"IsFinish": @(0), @"EndSignalValues":EndSignalValues} forKey:currentKey];
+}
+
+- (NSMutableArray *)valuesAddObject:(NSArray *)values newChar:(NSString *)newChar {
+    NSMutableArray *EndSignalValues = [NSMutableArray arrayWithArray:values];
+    [EndSignalValues addObject:newChar];
+    
+    return EndSignalValues;
+}
 
 #pragma mark - 私有工具方法
 - (void)createAlertView:(NSString *)msgText infomativeText:(NSString *)infomativeText {
