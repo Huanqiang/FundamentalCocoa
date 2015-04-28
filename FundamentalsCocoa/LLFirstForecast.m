@@ -11,11 +11,18 @@
 
 @interface LLFirstForecast () {
     NSDictionary *firstCollectionDictionary;
+    NSDictionary *followCollectionDictionary;
+    
+    // 预测分析表的 终结符集合
+    NSDictionary *forecastAnalyzeTableDictionary;
+    NSMutableArray *terminalSymbols;
+    BOOL forecastAnalyzeHasData;
 }
 
 @property (unsafe_unretained) IBOutlet NSTextView *grammarDataTextView;
 @property (unsafe_unretained) IBOutlet NSTextView *firstCollectionResultTextView;
 @property (unsafe_unretained) IBOutlet NSTextView *followCollectionResultTextView;
+@property (weak) IBOutlet NSTableView *forecastAnalyzeTableView;
 
 @end
 
@@ -25,7 +32,10 @@
     [super windowDidLoad];
     
     firstCollectionDictionary = [NSDictionary dictionary];
-    
+    followCollectionDictionary = [NSDictionary dictionary];
+    forecastAnalyzeTableDictionary = [NSDictionary dictionary];
+    terminalSymbols = [NSMutableArray array];
+    forecastAnalyzeHasData = NO;
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
 
@@ -190,8 +200,6 @@
     return @[arrowHeadArr[0], orSignalsArr];
 }
 
-
-
 // first集 数据处理
 - (NSDictionary *)dealWithFirstCollection:(NSString *)key firstCollection:(NSMutableDictionary *)firstCollection {
     NSArray *keys = [firstCollection allKeys];
@@ -296,6 +304,7 @@
         [followCollection setValue:[self removeRepetitionSignal:key firstCollection:followCollection] forKey:key];
     }
 
+    followCollectionDictionary = [NSDictionary dictionaryWithDictionary:followCollection];
     self.followCollectionResultTextView.string = [self fileContextShow:followCollection];
     
 }
@@ -435,8 +444,6 @@
     return @{@"IsFinish": isFinish, @"EndSignalValues": newValuesNoSelf};
 }
 
-
-
 // 保存 新数据 至 follow 集
 - (void)saveFollowCollectionData:(NSMutableDictionary *)followCollection currentKey:(NSString *)currentKey followChar:(NSString *)followChar  {
     NSMutableArray *EndSignalValues = [self valuesAddObject:[[followCollection objectForKey:currentKey] objectForKey:@"EndSignalValues"] newChar:followChar];
@@ -450,6 +457,216 @@
     
     return EndSignalValues;
 }
+
+#pragma mark - 求预测分析表
+
+- (IBAction)createForecastAnalyzeTable:(id)sender {
+    NSDictionary *baseFileContextDic = [self separateFollowCollection:self.grammarDataTextView.string];
+    // 创建一个 保存数据的字典
+    NSMutableDictionary *forecastAnalyzeTableDic = [self createDictionaryForSaveForecastAnalyzeTableData:baseFileContextDic];
+
+    // 进行规则二、三的判断
+    for (NSString *key in firstCollectionDictionary) {
+        NSArray *firstCResultArr = [firstCollectionDictionary objectForKey:key];
+        for (NSString *firstCResult in firstCResultArr) {
+            // 数据处理
+            [self foundFirstCExpression:key firstCResult:firstCResult baseFileContextDic:baseFileContextDic forecastAnalyzeTableDic:forecastAnalyzeTableDic];
+        }
+    }
+    
+    forecastAnalyzeTableDictionary = [NSDictionary dictionaryWithDictionary:forecastAnalyzeTableDic];
+    [self showForecastAnalyzeTableData:forecastAnalyzeTableDic];
+    
+}
+
+
+// 创建初始数据：一个用于保存数据的字典
+- (NSMutableDictionary *)createDictionaryForSaveForecastAnalyzeTableData:(NSDictionary *)baseFileContextDic {
+    
+    // 获取 所有的非终结符
+    NSArray *nonterminalSymbols = [baseFileContextDic allKeys];
+    
+    // 获取 所有的终结符
+    terminalSymbols = [NSMutableArray array];
+    BOOL isTerminalSymbol = YES;
+    
+    for (NSString *key in nonterminalSymbols) {
+        NSArray *values = [baseFileContextDic objectForKey:key];
+        for (NSString *value in values) {
+            for (int i = 0; i < [value length]; i++) {
+                // 将要判断的符号 默认为终结符
+                isTerminalSymbol = YES;
+                NSString *symbol = [NSString stringWithFormat:@"%c",[value characterAtIndex:i]];
+                
+                // 判断是不是终结符，不是的话，将判断符设置为非终结符（NO）
+                for (NSString *nonterminalSymbol in nonterminalSymbols) {
+                    if ([nonterminalSymbol isEqualToString:symbol]) {
+                        isTerminalSymbol = NO;
+                    }
+                }
+                
+                // 如果symbol 为空，也不是终结符
+                if ([symbol isEqualToString:@"$"]) {
+                    isTerminalSymbol = NO;
+                }
+                
+                if (isTerminalSymbol) {
+                    [terminalSymbols addObject:symbol];
+                }
+            }
+        }
+    }
+    // 额外加上结束标识符#
+    [terminalSymbols addObject:@"#"];
+    
+    // 将非终结符作为key，终结符作为内容创建Dictionary
+    NSMutableDictionary *forecastAnalyzeTableDic = [NSMutableDictionary dictionary];
+    for (NSString *nonterminalSymbol in nonterminalSymbols) {
+        NSMutableDictionary *terminalSymbolsDic = [NSMutableDictionary dictionary];
+        for (NSString *terminalSymbol in terminalSymbols) {
+            [terminalSymbolsDic setValue:@"" forKey:terminalSymbol];
+        }
+        [forecastAnalyzeTableDic setValue:terminalSymbolsDic forKey:nonterminalSymbol];
+    }
+    
+    return forecastAnalyzeTableDic;
+}
+
+// 规则二、三判断 主函数
+- (void)foundFirstCExpression:(NSString *)firstCKey
+                 firstCResult:(NSString *)firstCResult
+           baseFileContextDic:(NSDictionary *)baseFileContextDic
+      forecastAnalyzeTableDic:(NSMutableDictionary *)forecastAnalyzeTableDic {
+
+    NSArray *values = [baseFileContextDic objectForKey:firstCKey];
+    
+    for (NSString *value in values) {
+        NSString *firstCharWithValue = [NSString stringWithFormat:@"%c",[value characterAtIndex: 0]];
+        
+        // 判断是否等于 非终结符，如果是非终结符，则找出其对应的最后的终结符，并进行判断
+        for (NSString *key in [baseFileContextDic allKeys]) {
+            if ([key isEqualToString:firstCharWithValue]) {
+                if ([firstCResult isEqualToString:[self foundFirstC:key firstCResult:firstCResult baseFileContextDic:baseFileContextDic]]) {
+                    if ([firstCResult isEqualToString:@"$"]) {
+                        // 规则三 的处理
+                        [self dealWithThirdRulesWithForecastAnalyze:firstCKey value:value forecastAnalyzeTableDic:forecastAnalyzeTableDic];
+                    }else {
+                        // 规则二 的保存
+                        [self saveFirstCExpression:firstCKey firstCResult:firstCResult firstCExpression:value forecastAnalyzeTableDic:forecastAnalyzeTableDic];
+                    }
+                }
+            }
+        }
+        
+        if ([firstCharWithValue isEqualToString:firstCResult]) {
+            if ([firstCResult isEqualToString:@"$"]) {
+                // 规则三 的处理
+                [self dealWithThirdRulesWithForecastAnalyze:firstCKey value:value forecastAnalyzeTableDic:forecastAnalyzeTableDic];
+            }else {
+                // 规则二 的保存
+                [self saveFirstCExpression:firstCKey firstCResult:firstCResult firstCExpression:value forecastAnalyzeTableDic:forecastAnalyzeTableDic];
+            }
+        }
+    }
+    
+}
+
+// 找到 终结符
+- (NSString *)foundFirstC:(NSString *)firstCKey firstCResult:(NSString *)firstCResult
+       baseFileContextDic:(NSDictionary *)baseFileContextDic {
+    
+    NSArray *values = [baseFileContextDic objectForKey:firstCKey];
+    
+    for (NSString *value in values) {
+        NSString *firstCharWithValue = [NSString stringWithFormat:@"%c",[value characterAtIndex: 0]];
+        BOOL isNonKey = YES;
+        
+        for (NSString *key in [baseFileContextDic allKeys]) {
+            if ([key isEqualToString:firstCharWithValue]) {
+                isNonKey = NO;
+                return [self foundFirstC:key firstCResult:firstCResult baseFileContextDic:baseFileContextDic];
+            }
+        }
+        
+        if (isNonKey) {
+            if ([firstCResult isEqualToString:firstCharWithValue]) {
+                return firstCharWithValue;
+            }
+        }
+    }
+    
+    return nil;
+}
+
+// 规则三
+- (void)dealWithThirdRulesWithForecastAnalyze:(NSString *)firstCKey value:(NSString *)value forecastAnalyzeTableDic:(NSMutableDictionary *)forecastAnalyzeTableDic  {
+    
+    for (NSString *key in [followCollectionDictionary allKeys]) {
+        if ([key isEqualToString:firstCKey]) {
+            NSArray *followCResults = [followCollectionDictionary objectForKey:key];
+            for (NSString *followCResult in followCResults) {
+                [self saveFirstCExpression:firstCKey firstCResult:followCResult firstCExpression:value forecastAnalyzeTableDic:forecastAnalyzeTableDic];
+            }
+        }
+    }
+}
+
+// 在保存数据 的字典中，加入 找出的表达式
+- (void)saveFirstCExpression:(NSString *)firstCKey firstCResult:(NSString *)firstCResult firstCExpression:(NSString *)firstCExpression forecastAnalyzeTableDic:(NSMutableDictionary *)forecastAnalyzeTableDic {
+    NSMutableDictionary *dic = [forecastAnalyzeTableDic objectForKey:firstCKey];
+    
+    for (NSString *key in [dic allKeys]) {
+        if ([key isEqualToString:firstCResult]) {
+            [dic setObject:[NSString stringWithFormat:@"%@->%@", firstCKey, firstCExpression] forKey:firstCResult];
+        }
+    }
+    
+    [forecastAnalyzeTableDic setObject:dic forKey:firstCKey];
+}
+
+// 展示预测分析表
+- (void)showForecastAnalyzeTableData:(NSDictionary *)forecastAnalyzeTableDic {
+    if (!forecastAnalyzeHasData) {
+        forecastAnalyzeHasData = YES;
+        // 删除原有的 TableColumn
+        for (NSTableColumn *tableColumn in self.forecastAnalyzeTableView.tableColumns) {
+            [self.forecastAnalyzeTableView removeTableColumn:tableColumn];
+        }
+
+        // 创建 新的 TableColumn
+        for (int i = 0; i < [terminalSymbols count] + 1; i++) {
+            NSTableColumn * channTableColumn = [[NSTableColumn alloc] initWithIdentifier:[NSString stringWithFormat:@"channels%d",i]];
+            channTableColumn.maxWidth = 65;
+            if (i != 0) {
+                channTableColumn.title = terminalSymbols[i - 1];
+            }else {
+                channTableColumn.title = @"";
+            }
+            [self.forecastAnalyzeTableView addTableColumn:channTableColumn];
+        }
+    }
+    
+    [self.forecastAnalyzeTableView reloadData];
+}
+
+
+#pragma mark - 预测分析表的 TableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
+    return  [[forecastAnalyzeTableDictionary allKeys] count];
+}
+
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
+    NSString *key = [forecastAnalyzeTableDictionary allKeys][row];
+    NSDictionary *dic = [forecastAnalyzeTableDictionary objectForKey:key];
+    
+    if( [tableColumn.identifier isEqualToString:@"channels0"] ) {
+        return key;
+    }else {
+        NSString *channelsTitle = tableColumn.title;
+        return [dic objectForKey:channelsTitle];
+    }
+}
+
 
 #pragma mark - 私有工具方法
 - (void)createAlertView:(NSString *)msgText infomativeText:(NSString *)infomativeText {

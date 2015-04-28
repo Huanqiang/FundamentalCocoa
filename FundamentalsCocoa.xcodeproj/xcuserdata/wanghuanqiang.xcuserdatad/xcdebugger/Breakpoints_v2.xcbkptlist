@@ -283,13 +283,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451364607.68048"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "104"
-            endingLineNumber = "104"
-            landmarkName = "@implementation LLFirstForecast"
-            landmarkType = "3">
+            startingLineNumber = "113"
+            endingLineNumber = "113"
+            landmarkName = "-foundArrowhead:"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -299,11 +299,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451363973.720945"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "187"
-            endingLineNumber = "187"
+            startingLineNumber = "196"
+            endingLineNumber = "196"
             landmarkName = "-separateCollection:"
             landmarkType = "5">
          </BreakpointContent>
@@ -315,11 +315,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451365763.35904"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "232"
-            endingLineNumber = "232"
+            startingLineNumber = "239"
+            endingLineNumber = "239"
             landmarkName = "-removeRepetitionSignal:firstCollection:"
             landmarkType = "5">
          </BreakpointContent>
@@ -331,11 +331,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451819883.041984"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "442"
-            endingLineNumber = "442"
+            startingLineNumber = "448"
+            endingLineNumber = "448"
             landmarkName = "-saveFollowCollectionData:currentKey:followChar:"
             landmarkType = "5">
          </BreakpointContent>
@@ -347,11 +347,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451819883.041984"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "448"
-            endingLineNumber = "448"
+            startingLineNumber = "454"
+            endingLineNumber = "454"
             landmarkName = "-valuesAddObject:newChar:"
             landmarkType = "5">
          </BreakpointContent>
@@ -363,11 +363,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451819328.679969"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "346"
-            endingLineNumber = "346"
+            startingLineNumber = "354"
+            endingLineNumber = "354"
             landmarkName = "-dealWithOtherRule:currentKey:baseFollowCollectionData:"
             landmarkType = "5">
          </BreakpointContent>
@@ -379,11 +379,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451818592.067698"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "283"
-            endingLineNumber = "283"
+            startingLineNumber = "290"
+            endingLineNumber = "290"
             landmarkName = "-foundFollowCollection:"
             landmarkType = "5">
          </BreakpointContent>
@@ -395,11 +395,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451819328.679969"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "294"
-            endingLineNumber = "294"
+            startingLineNumber = "301"
+            endingLineNumber = "301"
             landmarkName = "-foundFollowCollection:"
             landmarkType = "5">
          </BreakpointContent>
@@ -411,11 +411,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451819216.034843"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "202"
-            endingLineNumber = "202"
+            startingLineNumber = "209"
+            endingLineNumber = "209"
             landmarkName = "-dealWithFirstCollection:firstCollection:"
             landmarkType = "5">
          </BreakpointContent>
@@ -427,12 +427,60 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/LLFirstForecast.m"
-            timestampString = "451819899.022485"
+            timestampString = "451912925.130643"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "299"
-            endingLineNumber = "299"
+            startingLineNumber = "307"
+            endingLineNumber = "307"
             landmarkName = "-foundFollowCollection:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "FundamentalsCocoa/LLFirstForecast.m"
+            timestampString = "451912925.130643"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "468"
+            endingLineNumber = "468"
+            landmarkName = "-createForecastAnalyzeTable:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "FundamentalsCocoa/LLFirstForecast.m"
+            timestampString = "451912925.130643"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "543"
+            endingLineNumber = "543"
+            landmarkName = "-foundFirstCExpression:firstCResult:baseFileContextDic:forecastAnalyzeTableDic:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "FundamentalsCocoa/LLFirstForecast.m"
+            timestampString = "451912925.130643"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "472"
+            endingLineNumber = "472"
+            landmarkName = "-createForecastAnalyzeTable:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

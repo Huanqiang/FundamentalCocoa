@@ -8,6 +8,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface LLFirstForecast : NSWindowController
+@interface LLFirstForecast : NSWindowController<NSTableViewDataSource, NSTableViewDelegate>
 
 @end
