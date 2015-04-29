@@ -17,12 +17,17 @@
     NSDictionary *forecastAnalyzeTableDictionary;
     NSMutableArray *terminalSymbols;
     BOOL forecastAnalyzeHasData;
+    
+    // 对句子进行预测分析
+    NSArray *analyzeStepsWithContext;
 }
 
 @property (unsafe_unretained) IBOutlet NSTextView *grammarDataTextView;
 @property (unsafe_unretained) IBOutlet NSTextView *firstCollectionResultTextView;
 @property (unsafe_unretained) IBOutlet NSTextView *followCollectionResultTextView;
 @property (weak) IBOutlet NSTableView *forecastAnalyzeTableView;
+@property (weak) IBOutlet NSTextField *needAnalyzeContextTextField;
+@property (weak) IBOutlet NSTableView *contextAnalyzeResultTableView;
 
 @end
 
@@ -36,6 +41,7 @@
     forecastAnalyzeTableDictionary = [NSDictionary dictionary];
     terminalSymbols = [NSMutableArray array];
     forecastAnalyzeHasData = NO;
+    analyzeStepsWithContext = [NSArray array];
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
 
@@ -652,20 +658,199 @@
 
 #pragma mark - 预测分析表的 TableView
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
-    return  [[forecastAnalyzeTableDictionary allKeys] count];
+    if (self.forecastAnalyzeTableView == tableView) {
+        return  [[forecastAnalyzeTableDictionary allKeys] count];
+    }else if (self.contextAnalyzeResultTableView == tableView) {
+        return [analyzeStepsWithContext count];
+    }else {
+        return 0;
+    }
+    
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
-    NSString *key = [forecastAnalyzeTableDictionary allKeys][row];
-    NSDictionary *dic = [forecastAnalyzeTableDictionary objectForKey:key];
-    
-    if( [tableColumn.identifier isEqualToString:@"channels0"] ) {
-        return key;
+    if (self.forecastAnalyzeTableView == tableView) {
+        NSString *key = [forecastAnalyzeTableDictionary allKeys][row];
+        NSDictionary *dic = [forecastAnalyzeTableDictionary objectForKey:key];
+        
+        if( [tableColumn.identifier isEqualToString:@"channels0"] ) {
+            return key;
+        }else {
+            NSString *channelsTitle = tableColumn.title;
+            return [dic objectForKey:channelsTitle];
+        }
+    }else if (self.contextAnalyzeResultTableView == tableView) {
+//        @{@"stepsNumber":@([analyzeSteps count] + 1), @"analyzeStack": [self arrayToString:analyzeStack], @"contextStack": [self arrayToString:contextStack], @"analyzeExpression": expression}
+        NSDictionary *analyzeResultDic = [analyzeStepsWithContext objectAtIndex:row];
+        if([tableColumn.identifier isEqualToString:@"stepsNumber"] ) {
+            return [analyzeResultDic objectForKey:@"stepsNumber"];
+        }else if([tableColumn.identifier isEqualToString:@"analyzeStack"] ) {
+            return [analyzeResultDic objectForKey:@"analyzeStack"];
+        }else if([tableColumn.identifier isEqualToString:@"contextStack"] ) {
+            return [analyzeResultDic objectForKey:@"contextStack"];
+        }else {
+            return [analyzeResultDic objectForKey:@"analyzeExpression"];
+        }
+        
     }else {
-        NSString *channelsTitle = tableColumn.title;
-        return [dic objectForKey:channelsTitle];
+        return nil;
+    }
+    
+}
+
+
+#pragma mark - 对句子进行预测分析
+- (IBAction)dealContextAnalyze:(id)sender {
+    if ([self.needAnalyzeContextTextField.stringValue isEqualToString:@""]) {
+        [self createAlertView:@"输入串错误！" infomativeText:@"输入串为空，请填写正确的输入串！"];
+        return;
+    }
+    
+    NSMutableArray *analyzeStack = [NSMutableArray arrayWithArray:[self createAnalyzeStack]];
+    NSMutableArray *contextStack = [self createContextStack];
+    NSMutableArray *analyzeSteps = [NSMutableArray array];
+    
+    while (![self isAnalyzeFinish:analyzeStack contextStack:contextStack]) {
+        NSString *analyzeStackTopElement = [self gainAnalyzeStackTopElement:analyzeStack];
+        NSString *contextStackTopElement = [self gainContextStackTopElement:contextStack];
+        
+        if ([analyzeStackTopElement isEqualToString:contextStackTopElement]) {
+            // 做相等处理：弹栈
+            // 并记录
+            [self dealWithAnalyzeEqualToContext:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack];
+        }else {
+            // 在分析数据的字典中寻找由 analyzeStackTopElement 和 contextStackTopElement 所确定的唯一的产生式
+            // 并弹栈 analyzeStack
+            // 将 产生式 逆序加入analyzeStack
+            // 做记录
+            // 如果没有找出产生式，说明需要分析的句子和预测分析表不匹配，返回NO；
+            if (![self dealWithAnalyzeNotEqualToContext:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack]) {
+                [self saveAnalyzeSteps:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack expression:@"不接受"];
+                break;
+            }
+        }
+    }
+    
+    [self saveAnalyzeSteps:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack expression:@"接受"];
+    
+    analyzeStepsWithContext = [NSArray arrayWithArray:analyzeSteps];
+    [self.contextAnalyzeResultTableView reloadData];
+}
+
+// 栈顶两个元素相等，做处理 
+- (void)dealWithAnalyzeEqualToContext:(NSMutableArray *)analyzeSteps analyzeStack:(NSMutableArray *)analyzeStack contextStack:(NSMutableArray *)contextStack  {
+    NSString *contextStackTopElement = [self gainContextStackTopElement:contextStack];
+    // 做记录
+    [self saveAnalyzeSteps:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack expression:[NSString stringWithFormat:@"%@相等", contextStackTopElement]];
+    // 删除栈顶元素
+    [self deleteAnalyzeStackTopElement:analyzeStack];
+    [self deleteContextStackTopElement:contextStack];
+    
+}
+
+
+// 栈顶两个元素不相等，做处理
+- (BOOL)dealWithAnalyzeNotEqualToContext:(NSMutableArray *)analyzeSteps analyzeStack:(NSMutableArray *)analyzeStack contextStack:(NSMutableArray *)contextStack {
+    // 在分析数据的字典中寻找由 analyzeStackTopElement 和 contextStackTopElement 所确定的唯一的产生式
+    
+    NSString *expression = [self foundAnalyzeExpression:analyzeStack contextStack:contextStack];
+    
+    // 如果没有找出产生式，说明需要分析的句子和预测分析表不匹配，返回NO；
+    if ([expression isEqualToString:@""]) {
+        return NO;
+    }
+    
+    // 做记录
+    [self saveAnalyzeSteps:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack expression:expression];
+    
+    // 并弹栈 analyzeStack
+    [self deleteAnalyzeStackTopElement:analyzeStack];
+    
+    if (![expression hasSuffix:@"$"]) {
+        // 将 产生式 逆序加入analyzeStack
+        [self addNewObjectToAnalyzeSatckByReversedOrder:analyzeStack newValues:expression];
+    }
+    
+    return YES;
+}
+
+- (NSString *)foundAnalyzeExpression:(NSMutableArray *)analyzeStack contextStack:(NSMutableArray *)contextStack {
+    NSString *analyzeStackTopElement = [self gainAnalyzeStackTopElement:analyzeStack];
+    NSString *contextStackTopElement = [self gainContextStackTopElement:contextStack];
+    
+    return [[forecastAnalyzeTableDictionary objectForKeyedSubscript:analyzeStackTopElement] objectForKey:contextStackTopElement];
+}
+
+// 逆序添加新的元素
+- (void)addNewObjectToAnalyzeSatckByReversedOrder:(NSMutableArray *)analyzeStack newValues:(NSString *)newValues {
+    NSArray *arrowArr = [newValues componentsSeparatedByString:@"->"];
+    int expressionLength = (int)[arrowArr[1] length] - 1;
+    
+    for (int i = expressionLength; i >= 0; i--) {
+        NSString *currentChar = [NSString stringWithFormat:@"%c", [arrowArr[1] characterAtIndex:i]];
+        [analyzeStack addObject:currentChar];
     }
 }
+
+
+// 判断分析是否结束
+- (BOOL)isAnalyzeFinish:(NSArray *)analyzeStack contextStack:(NSArray *)contextStack {
+    NSString *analyzeStackTopElement = [self gainAnalyzeStackTopElement:analyzeStack];
+    NSString *contextStackTopElement = [self gainContextStackTopElement:contextStack];
+    if ([analyzeStackTopElement isEqualToString:@"#"] && [contextStackTopElement isEqualToString:@"#"]) {
+        return  YES;
+    }
+    
+    return NO;
+}
+
+// 记录两栈的当前状态
+- (void)saveAnalyzeSteps:(NSMutableArray *)analyzeSteps analyzeStack:(NSMutableArray *)analyzeStack contextStack:(NSMutableArray *)contextStack expression:(NSString *)expression {
+    [analyzeSteps addObject:@{@"stepsNumber":@([analyzeSteps count] + 1), @"analyzeStack": [self arrayToString:analyzeStack], @"contextStack": [self arrayToString:contextStack], @"analyzeExpression": expression}];
+}
+
+
+
+#pragma mark - 对预测分析 的 堆栈的操作
+// 创建两个栈
+- (NSArray *)createAnalyzeStack {
+    NSString *startSignal = [NSString stringWithFormat:@"%c", [self.grammarDataTextView.string characterAtIndex:0]];
+    return @[@"#", startSignal];
+}
+
+- (NSMutableArray *)createContextStack {
+    NSMutableArray *contextStack = [NSMutableArray array];
+    [contextStack addObject:@"#"];
+    
+    int needAnalyzeContextLength = (int)[self.needAnalyzeContextTextField.stringValue length];
+    for (int i = needAnalyzeContextLength - 1; i >= 0; i--) {
+        NSString *currentChar = [NSString stringWithFormat:@"%c",[self.needAnalyzeContextTextField.stringValue characterAtIndex:i]];
+        [contextStack addObject:currentChar];
+    }
+    
+    return contextStack;
+}
+
+
+
+// 获取栈顶元素
+- (NSString *)gainAnalyzeStackTopElement:(NSArray *)analyzeStack{
+    return [analyzeStack lastObject];
+}
+
+- (NSString *)gainContextStackTopElement:(NSArray *)contextStack{
+    return [contextStack lastObject];
+}
+
+// 弹栈
+- (void)deleteAnalyzeStackTopElement:(NSMutableArray *)analyzeStack {
+    [analyzeStack removeLastObject];
+}
+
+- (void)deleteContextStackTopElement:(NSMutableArray *)contextStack {
+    [contextStack removeLastObject];
+}
+
 
 
 #pragma mark - 私有工具方法
@@ -678,6 +863,15 @@
     [alert beginSheetModalForWindow:self.window completionHandler:nil];
 }
 
+- (NSString *)arrayToString:(NSArray *)arr {
+    // 对数据进行处理
+    NSMutableString *allValue = [NSMutableString string];
+    for (NSString *value in arr) {
+        [allValue appendFormat:@"%@", value];
+    }
+    
+    return allValue;
+}
 
 
 
