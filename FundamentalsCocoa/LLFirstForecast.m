@@ -465,7 +465,6 @@
 }
 
 #pragma mark - 求预测分析表
-
 - (IBAction)createForecastAnalyzeTable:(id)sender {
     NSDictionary *baseFileContextDic = [self separateFollowCollection:self.grammarDataTextView.string];
     // 创建一个 保存数据的字典
@@ -632,25 +631,24 @@
 
 // 展示预测分析表
 - (void)showForecastAnalyzeTableData:(NSDictionary *)forecastAnalyzeTableDic {
-    if (!forecastAnalyzeHasData) {
-        forecastAnalyzeHasData = YES;
-        // 删除原有的 TableColumn
-        for (NSTableColumn *tableColumn in self.forecastAnalyzeTableView.tableColumns) {
-            [self.forecastAnalyzeTableView removeTableColumn:tableColumn];
-        }
-
-        // 创建 新的 TableColumn
-        for (int i = 0; i < [terminalSymbols count] + 1; i++) {
-            NSTableColumn * channTableColumn = [[NSTableColumn alloc] initWithIdentifier:[NSString stringWithFormat:@"channels%d",i]];
-            channTableColumn.maxWidth = 65;
-            if (i != 0) {
-                channTableColumn.title = terminalSymbols[i - 1];
-            }else {
-                channTableColumn.title = @"";
-            }
-            [self.forecastAnalyzeTableView addTableColumn:channTableColumn];
-        }
+    // 删除原有的 TableColumn
+    NSArray *tableColumns = [NSArray arrayWithArray:self.forecastAnalyzeTableView.tableColumns];
+    for (NSTableColumn *tableColumn in tableColumns) {
+        [self.forecastAnalyzeTableView removeTableColumn:tableColumn];
     }
+    
+    // 创建 新的 TableColumn
+    for (int i = 0; i < [terminalSymbols count] + 1; i++) {
+        NSTableColumn * channTableColumn = [[NSTableColumn alloc] initWithIdentifier:[NSString stringWithFormat:@"channels%d",i]];
+        channTableColumn.maxWidth = 65;
+        if (i != 0) {
+            channTableColumn.title = terminalSymbols[i - 1];
+        }else {
+            channTableColumn.title = @"";
+        }
+        [self.forecastAnalyzeTableView addTableColumn:channTableColumn];
+    }
+
     
     [self.forecastAnalyzeTableView reloadData];
 }
@@ -709,6 +707,7 @@
     NSMutableArray *analyzeStack = [NSMutableArray arrayWithArray:[self createAnalyzeStack]];
     NSMutableArray *contextStack = [self createContextStack];
     NSMutableArray *analyzeSteps = [NSMutableArray array];
+    BOOL isRigthWithContext = YES;
     
     while (![self isAnalyzeFinish:analyzeStack contextStack:contextStack]) {
         NSString *analyzeStackTopElement = [self gainAnalyzeStackTopElement:analyzeStack];
@@ -725,13 +724,18 @@
             // 做记录
             // 如果没有找出产生式，说明需要分析的句子和预测分析表不匹配，返回NO；
             if (![self dealWithAnalyzeNotEqualToContext:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack]) {
-                [self saveAnalyzeSteps:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack expression:@"不接受"];
+                isRigthWithContext = NO;
+                
                 break;
             }
         }
     }
     
-    [self saveAnalyzeSteps:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack expression:@"接受"];
+    if (isRigthWithContext) {
+        [self saveAnalyzeSteps:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack expression:@"接受"];
+    }else {
+        [self saveAnalyzeSteps:analyzeSteps analyzeStack:analyzeStack contextStack:contextStack expression:@"不接受"];
+    }
     
     analyzeStepsWithContext = [NSArray arrayWithArray:analyzeSteps];
     [self.contextAnalyzeResultTableView reloadData];
@@ -756,7 +760,7 @@
     NSString *expression = [self foundAnalyzeExpression:analyzeStack contextStack:contextStack];
     
     // 如果没有找出产生式，说明需要分析的句子和预测分析表不匹配，返回NO；
-    if ([expression isEqualToString:@""]) {
+    if ([expression isEqualToString:@""] || expression == nil) {
         return NO;
     }
     

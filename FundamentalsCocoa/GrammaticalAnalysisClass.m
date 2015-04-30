@@ -7,11 +7,14 @@
 //
 
 #import "GrammaticalAnalysisClass.h"
+#import "FileOperateClass.h"
 
 @implementation GrammaticalAnalysisClass
 
-- (void)grammaticalAnalysis:(NSString *)fileContext {
+// 语法分析主程序
+- (void)grammaticalAnalysis:(NSArray *)fileContext {
     
 }
+
 
 @end

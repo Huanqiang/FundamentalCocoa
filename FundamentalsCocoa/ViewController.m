@@ -15,6 +15,8 @@
 @end
 
 @implementation ViewController
+@synthesize symbolFormCodeTypeArr;
+@synthesize tokenFormCodeTypeArr;
 @synthesize showCodeTextView;
 @synthesize showResultTextView;
 @synthesize wordDistinguishResultTableView;
@@ -24,6 +26,8 @@
 
     // Do any additional setup after loading the view.
     tokenArr = [NSArray array];
+    symbolFormCodeTypeArr = [NSArray array];
+    tokenFormCodeTypeArr = [NSArray array];
 }
 
 - (void)setRepresentedObject:(id)representedObject {

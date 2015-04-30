@@ -21,10 +21,12 @@
 #import "ViewController.h"
 #import "FundamentalsResultPanelViewController.h"
 #import "LLFirstForecast.h"
+#import "OperatorPriorateWindowController.h"
 
 @interface MenuOperating () {
     FundamentalsResultPanelViewController *fundamentalsResultViewController;
     LLFirstForecast *llFirstForecastViewController;
+    OperatorPriorateWindowController *operatorPriorateWindowController;
 }
 
 @end
@@ -50,6 +52,10 @@
     // 进行 词法分析
     [codeTypeOperating dealWithCode:mainViewController.showCodeTextView.string];
     
+    // 获取token 和symbol
+    mainViewController.symbolFormCodeTypeArr = [NSArray arrayWithArray:codeTypeOperating.symbolArr];
+    mainViewController.tokenFormCodeTypeArr = [NSArray arrayWithArray:codeTypeOperating.tokenArr];
+    
     // 将 词法分析 的正确部分 放到主界面的相应位置
     [mainViewController dealWithToken:codeTypeOperating.tokenArr];
     
@@ -74,11 +80,9 @@
     }else {
         [falseInfoString appendString:@"暂无错误!"];
     }
-    
-    
+
     return falseInfoString;
 }
-
 
 #pragma mark - 编译
 - (IBAction)fundamentalCode:(id)sender {
@@ -101,11 +105,20 @@
 }
 
 
+#pragma mark - 算符优先
+- (IBAction)operatorPriorate:(id)sender {
+    if (!operatorPriorateWindowController) {
+        operatorPriorateWindowController = [[OperatorPriorateWindowController alloc] initWithWindowNibName:@"OperatorPriorateWindowController"];
+    }
+    [operatorPriorateWindowController showWindow:self];
+}
+
 #pragma mark - 语法 分析
 - (IBAction)grammaticalAnalysis:(id)sender {
     // 将 获取的数据传递给 ViewController 的 TextView
     ViewController *mainViewController = [self gainMainViewController];
     GrammaticalAnalysisClass *grammaticalAnalysis = [[GrammaticalAnalysisClass alloc] init];
+    [grammaticalAnalysis grammaticalAnalysis:mainViewController.symbolFormCodeTypeArr];
 }
 
 

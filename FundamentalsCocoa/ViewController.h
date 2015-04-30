@@ -10,6 +10,8 @@
 
 @interface ViewController : NSViewController<NSTableViewDataSource, NSTableViewDelegate>
 
+@property (nonatomic, strong) NSArray *symbolFormCodeTypeArr;
+@property (nonatomic, strong) NSArray *tokenFormCodeTypeArr;
 @property (unsafe_unretained) IBOutlet NSTextView *showCodeTextView;
 @property (unsafe_unretained) IBOutlet NSTextView *showResultTextView;
 
