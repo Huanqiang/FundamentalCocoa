@@ -6,6 +6,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="OperatorPriorateWindowController">
             <connections>
+                <outlet property="contextNeedAnalyzeTextField" destination="31d-SF-Trj" id="2uB-sG-iaZ"/>
                 <outlet property="firstVTResultTextView" destination="rRd-YA-wId" id="gZr-EX-twb"/>
                 <outlet property="grammarDataTextView" destination="D69-sS-mrm" id="Qtr-w2-weI"/>
                 <outlet property="lastVTResultTextView" destination="jbD-pu-eRs" id="2gj-x4-RgJ"/>
@@ -305,7 +306,7 @@
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         </tableColumn>
                                         <tableColumn identifier="analyzeExpression" width="155" minWidth="40" maxWidth="1000" id="grP-Wu-vTU">
-                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="推导所用产生式">
+                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="说明">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -318,6 +319,10 @@
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         </tableColumn>
                                     </tableColumns>
+                                    <connections>
+                                        <outlet property="dataSource" destination="-2" id="4QY-6C-wfr"/>
+                                        <outlet property="delegate" destination="-2" id="7ax-UX-ZRj"/>
+                                    </connections>
                                 </tableView>
                             </subviews>
                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>

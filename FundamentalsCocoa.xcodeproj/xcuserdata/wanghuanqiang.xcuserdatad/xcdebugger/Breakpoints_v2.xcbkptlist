@@ -603,11 +603,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/OperatorPriorateWindowController.m"
-            timestampString = "452093247.442621"
+            timestampString = "452181683.418617"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "55"
-            endingLineNumber = "55"
+            startingLineNumber = "60"
+            endingLineNumber = "60"
             landmarkName = "@implementation OperatorPriorateWindowController"
             landmarkType = "3">
          </BreakpointContent>
@@ -619,11 +619,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/OperatorPriorateWindowController.m"
-            timestampString = "452093247.442621"
+            timestampString = "452181683.418617"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "203"
-            endingLineNumber = "203"
+            startingLineNumber = "208"
+            endingLineNumber = "208"
             landmarkName = "-removeNonTerminalAndRepeatSymbolFormVT:keys:"
             landmarkType = "5">
          </BreakpointContent>
@@ -635,11 +635,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/OperatorPriorateWindowController.m"
-            timestampString = "452093247.442621"
+            timestampString = "452181683.418617"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "148"
-            endingLineNumber = "148"
+            startingLineNumber = "153"
+            endingLineNumber = "153"
             landmarkName = "-dealWithLastVTWithRules:currentKey:currentValue:"
             landmarkType = "5">
          </BreakpointContent>
@@ -651,11 +651,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/OperatorPriorateWindowController.m"
-            timestampString = "452093328.162962"
+            timestampString = "452181683.418617"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "275"
-            endingLineNumber = "275"
+            startingLineNumber = "278"
+            endingLineNumber = "278"
             landmarkName = "-createOperatorPriorData:"
             landmarkType = "5">
          </BreakpointContent>
@@ -667,28 +667,44 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/OperatorPriorateWindowController.m"
-            timestampString = "452093403.851131"
+            timestampString = "452227836.115055"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "283"
-            endingLineNumber = "283"
-            landmarkName = "-createOperatorPriorData:"
+            startingLineNumber = "430"
+            endingLineNumber = "430"
+            landmarkName = "-contextAnalyze:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "FundamentalsCocoa/OperatorPriorateWindowController.m"
-            timestampString = "452093629.949084"
+            timestampString = "452228784.436887"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "315"
-            endingLineNumber = "315"
-            landmarkName = "-createOperatorPriorData:"
+            startingLineNumber = "448"
+            endingLineNumber = "448"
+            landmarkName = "-dealWithOPerateAnalyze:contextSatck:analyzeStack:perateAnalyzeResultSteps:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "FundamentalsCocoa/OperatorPriorateWindowController.m"
+            timestampString = "452230807.733976"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "465"
+            endingLineNumber = "465"
+            landmarkName = "-dealWithOPerateAnalyze:contextSatck:analyzeStack:perateAnalyzeResultSteps:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

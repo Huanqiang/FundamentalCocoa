@@ -13,7 +13,11 @@
     NSDictionary *firstVTValuesDic;
     NSDictionary *lastVTValuesDic;
     NSDictionary *operatorPriorDic;
-    NSDictionary *operatorPriorResultDic;
+    NSArray *operatorPriorResultArr;
+    
+    // 获取 终结符/非终结符数组
+    NSArray *terminalSymbols;
+    NSArray *nonTerminalSymbols;
 }
 
 
@@ -22,6 +26,7 @@
 @property (unsafe_unretained) IBOutlet NSTextView *lastVTResultTextView;
 @property (weak) IBOutlet NSTableView *operatorPriorateDataTableView;
 @property (weak) IBOutlet NSTableView *operatorPriorateResultWithContextTableView;
+@property (weak) IBOutlet NSTextField *contextNeedAnalyzeTextField;
 
 @end
 
@@ -32,7 +37,7 @@
     firstVTValuesDic = [NSDictionary dictionary];
     lastVTValuesDic = [NSDictionary dictionary];
     operatorPriorDic = [NSDictionary dictionary];
-    operatorPriorResultDic = [NSDictionary dictionary];
+    operatorPriorResultArr = [NSArray array];
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
 
@@ -58,6 +63,8 @@
 - (IBAction)foundFirstVTCollection:(id)sender {
     NSDictionary *baseDataWithFirstVT = [self gainBaseCollectionDataBySeparateVT:self.grammarDataTextView.string];
     NSMutableDictionary *firstVTCollection = [self createFollowCollectionData:baseDataWithFirstVT];
+    // 获取 非终结符数组
+    nonTerminalSymbols = [baseDataWithFirstVT allKeys];
     
     // 按规则一找出 该文法的 FirstVT
     for (NSString *key in [baseDataWithFirstVT allKeys]) {
@@ -79,11 +86,9 @@
 
 // 按规则处理 firstVT
 - (void)dealWithFirstVTWithRules:(NSMutableDictionary *)firstVTCollection currentKey:(NSString *)currentKey currentValue:(NSString *)currentValue {
-    
-    NSArray *keys = [firstVTCollection allKeys];
     NSString *currentChar = [NSString stringWithFormat:@"%c", [currentValue characterAtIndex:0]];
     
-    if ([self currentCharIsNonTerminalSymbol:currentChar keys:keys]) {
+    if ([self currentCharIsNonTerminalSymbol:currentChar]) {
         // 将 该非终结符的FirstVT 加入 所求的非终结符的 FirstVT
         [self saveCurrentCharToVTCollection:currentKey currentChar:currentChar vtCollection:firstVTCollection];
         
@@ -94,7 +99,7 @@
         }
         
         NSString *nextChar = [NSString stringWithFormat:@"%c", [currentValue characterAtIndex:1]];
-        if (![self currentCharIsNonTerminalSymbol:nextChar keys:keys]) {
+        if (![self currentCharIsNonTerminalSymbol:nextChar]) {
             // 将该字符(nextChar)加入 所求的非终结符的 FirstVT
             [self saveCurrentCharToVTCollection:currentKey currentChar:nextChar vtCollection:firstVTCollection];
         }
@@ -131,7 +136,7 @@
     NSUInteger lastIndex = [currentValue length] - 1;
     NSString *lastChar = [NSString stringWithFormat:@"%c", [currentValue characterAtIndex:lastIndex]];
     
-    if ([self currentCharIsNonTerminalSymbol:lastChar keys:[lastVTCollection allKeys]]) {
+    if ([self currentCharIsNonTerminalSymbol:lastChar]) {
         [self saveCurrentCharToVTCollection:currentKey currentChar:lastChar vtCollection:lastVTCollection];
         // 判断如果最后一个元素是非终结符，则判断最后第二个元素是不是终结符，是的话加入
         if ([currentValue length] < 2) {
@@ -139,7 +144,7 @@
         }
         
         NSString *proChar = [NSString stringWithFormat:@"%c", [currentValue characterAtIndex:lastIndex - 1]];
-        if (![self currentCharIsNonTerminalSymbol:proChar keys:[lastVTCollection allKeys]]) {
+        if (![self currentCharIsNonTerminalSymbol:proChar]) {
             [self saveCurrentCharToVTCollection:currentKey currentChar:proChar vtCollection:lastVTCollection];
         }
     }else {
@@ -210,7 +215,7 @@
     NSNumber *isFinish = @(1);
     
     for (NSString *value in values) {
-        if ([self currentCharIsNonTerminalSymbol:value keys:[firstVTCollection allKeys]]) {
+        if ([self currentCharIsNonTerminalSymbol:value]) {
             isFinish = @(0);
             [newValues removeObject:value];
             [newValues addObjectsFromArray:[[[firstVTCollection objectForKey:value] objectForKey:@"EndSignalValues"] copy]];
@@ -266,12 +271,11 @@
 - (IBAction)createOperatorPriorData:(id)sender {
      NSDictionary *contextDic = [self gainBaseCollectionDataBySeparateVT:self.grammarDataTextView.string];
     // 获取 终结符数组
-    NSArray *terminalSymbols = [self gainTerminalSymbols:contextDic];
-    // 获取 非终结符数组
-    NSArray *nonTerminalSymbols = [contextDic allKeys];
+    terminalSymbols = [self gainTerminalSymbols:contextDic];
     // 创建 最终数据存储字典
-    NSMutableDictionary *operatorPriorDictionary = [self createOperatorPriorDic:terminalSymbols];
+    NSMutableDictionary *operatorPriorDictionary = [self createOperatorPriorDic];
     
+    // 进行规则的判断并处理
     for (NSString *nonTerminalSymbol in nonTerminalSymbols) {
         NSArray *values = [contextDic objectForKey:nonTerminalSymbol];
         // 循环每一个表达式
@@ -282,22 +286,22 @@
                 NSString *currentChar = [NSString stringWithFormat:@"%c",[value characterAtIndex:i]];
                 NSString *nextChar = [NSString stringWithFormat:@"%c",[value characterAtIndex:i + 1]];
                 // 判断当前字符是不是非终结符，是的话，进行规则四的判断
-                if ([self currentCharIsNonTerminalSymbol:currentChar keys:nonTerminalSymbols]) {
+                if ([self currentCharIsNonTerminalSymbol:currentChar]) {
                     // 规则四判断
-                    if(![self currentCharIsNonTerminalSymbol:nextChar keys:nonTerminalSymbols]) {
+                    if(![self currentCharIsNonTerminalSymbol:nextChar]) {
                         // 规则四处理
                         [self dealWithOperatorPriorWithFourthRules:operatorPriorDictionary fatherChar:currentChar sonChar:nextChar];
                     }
                 }else {
                     // 判断下一个字符是不是非终结符， 是的话，进行规则二、三的判断
-                    if ([self currentCharIsNonTerminalSymbol:nextChar keys:nonTerminalSymbols]) {
+                    if ([self currentCharIsNonTerminalSymbol:nextChar]) {
                         // 规则三处理
                         [self dealWithOperatorPriorWithThirdRules:operatorPriorDictionary fatherChar:currentChar sonChar:nextChar];
                         
                         // 规则二判断
                         if(i < [value length] - 2) {
                             NSString *nextNextChar = [NSString stringWithFormat:@"%c",[value characterAtIndex:i + 2]];
-                            if (![self currentCharIsNonTerminalSymbol:nextNextChar keys:nonTerminalSymbols]) {
+                            if (![self currentCharIsNonTerminalSymbol:nextNextChar]) {
                                 // 规则二处理
                                 [self dealWithOperatorPriorWithFirstAndSecondRules:operatorPriorDictionary fatherChar:currentChar sonChar:nextNextChar];
                             }
@@ -313,32 +317,32 @@
     }
     
     operatorPriorDic = [NSMutableDictionary dictionaryWithDictionary:operatorPriorDictionary];
-    [self showOperatorPriorTableData:operatorPriorDictionary terminalSymbols:terminalSymbols];
+    [self showOperatorPriorTableData:operatorPriorDictionary];
 }
 
 // 获取 所有的终结符
 - (NSArray *)gainTerminalSymbols:(NSDictionary *)contextDic {
     NSArray *keys = [contextDic allKeys];
-    NSMutableArray *terminalSymbols = [NSMutableArray array];
+    NSMutableArray *newTerminalSymbols = [NSMutableArray array];
     
     for (NSString *key in keys) {
         for (NSString *value in [contextDic objectForKey:key]) {
             for (int i = 0; i < [value length]; i++) {
                 NSString *currentChar = [NSString stringWithFormat:@"%c",[value characterAtIndex:i]];
-                if (![self currentCharIsNonTerminalSymbol:currentChar keys:keys]) {
-                    [terminalSymbols addObject:currentChar];
+                if (![self currentCharIsNonTerminalSymbol:currentChar]) {
+                    [newTerminalSymbols addObject:currentChar];
                 }
             }
         }
     }
     
     // 删除可能有的重复数据
-    NSSet *newTerminalSymbols = [NSSet setWithArray:terminalSymbols];
-    return [newTerminalSymbols allObjects];
+    NSSet *newTerminalSymbolsWithNonRepeat = [NSSet setWithArray:newTerminalSymbols];
+    return [newTerminalSymbolsWithNonRepeat allObjects];
 }
 
 // 创建 最终数据存储字典
-- (NSMutableDictionary *)createOperatorPriorDic:(NSArray *)terminalSymbols {
+- (NSMutableDictionary *)createOperatorPriorDic {
     NSMutableDictionary *operatorPriorDic1 = [NSMutableDictionary dictionary];
     
     for (NSString *terminalSymbolFather in terminalSymbols) {
@@ -389,7 +393,7 @@
 }
 
 // 展示预测分析表
-- (void)showOperatorPriorTableData:(NSDictionary *)forecastAnalyzeTableDic terminalSymbols:(NSArray *)terminalSymbols {
+- (void)showOperatorPriorTableData:(NSDictionary *)forecastAnalyzeTableDic{
     // 删除原有的 TableColumn
     NSArray *tableColumns = [NSArray arrayWithArray:self.operatorPriorateDataTableView.tableColumns];
     for (NSTableColumn *tableColumn in tableColumns) {
@@ -414,15 +418,269 @@
 
 #pragma mark - 句子分析
 - (IBAction)contextAnalyze:(id)sender {
+    NSDictionary *contextDic = [self gainBaseCollectionDataBySeparateVT:self.grammarDataTextView.string];
+    // 输入缓冲数组
+    NSMutableArray *contextNeedAnalyzeStack = [self createContextAnalyzeStack:self.contextNeedAnalyzeTextField.stringValue];
+    // 分析栈
+    NSMutableArray *analyzeStack = [NSMutableArray arrayWithObject:@"#"];
+    NSMutableArray *operateAnalyzeResultSteps = [NSMutableArray array];
+    BOOL isSucess = YES;
+    
+    [self saveOperateAnalyzeResult:operateAnalyzeResultSteps anaylzeStack:analyzeStack contextStack:contextNeedAnalyzeStack value:@"初始状态"];
+    while (![self isSuccessWithOperateAnalyze:contextNeedAnalyzeStack analyzeStack:analyzeStack]) {
+        if (![self dealWithOPerateAnalyze:contextDic contextSatck:contextNeedAnalyzeStack analyzeStack:analyzeStack perateAnalyzeResultSteps:operateAnalyzeResultSteps]) {
+            isSucess = NO;
+            break;
+        }
+    }
+    
+    if (isSucess) {
+        [self saveOperateAnalyzeResult:operateAnalyzeResultSteps anaylzeStack:analyzeStack contextStack:contextNeedAnalyzeStack value:@"成功"];
+    }else {
+        [self saveOperateAnalyzeResult:operateAnalyzeResultSteps anaylzeStack:analyzeStack contextStack:contextNeedAnalyzeStack value:@"失败"];
+    }
+    
+    operatorPriorResultArr = [NSArray arrayWithArray:operateAnalyzeResultSteps];
+    [self.operatorPriorateResultWithContextTableView reloadData];
 }
 
+- (BOOL)dealWithOPerateAnalyze:(NSDictionary *)contextDic contextSatck:(NSMutableArray *)contextSatck analyzeStack:(NSMutableArray *)analyzeStack perateAnalyzeResultSteps:(NSMutableArray *)perateAnalyzeResultSteps {
+    for (int i = 0; i < [contextSatck count]; i++) {
+        NSString *topElementWithContextSatck = [contextSatck firstObject];
+        NSString *topElementWithAnalyzeSatck = [self topElementWithAnalyzeStack:analyzeStack];
+        NSString *operateSymbol = [self gainOperateSymbolInOperatorPriorDic:topElementWithAnalyzeSatck topElementWithContextSatck:topElementWithContextSatck];
+        if ([operateSymbol isEqualToString:@"<"] || [operateSymbol isEqualToString:@"="]) {
+            // 缓存栈弹栈，分析栈压栈
+            [self pushElementToAnalyzeStack:topElementWithContextSatck analyzeStack:analyzeStack];
+            [self removeElementFormContextStack:contextSatck];
+            // 保存
+            NSString *value = [NSString stringWithFormat:@"%@%@%@, %@入栈", topElementWithAnalyzeSatck, operateSymbol, topElementWithContextSatck, topElementWithContextSatck];
+            [self saveOperateAnalyzeResult:perateAnalyzeResultSteps anaylzeStack:analyzeStack contextStack:contextSatck value:value];
+        }else {
+            if ([self numberOfTerminalSymbolInStack:analyzeStack] != 1) {
+                NSString *secondElementWithAnalyzeSatck = [self secondElementWithAnalyzeStack:analyzeStack];
+                NSString *operateSymbolWithSecond = [self gainOperateSymbolInOperatorPriorDic:secondElementWithAnalyzeSatck topElementWithContextSatck:topElementWithAnalyzeSatck];
+                if ([operateSymbol isEqualToString:@">"] && [operateSymbolWithSecond isEqualToString:@"<"]) {
+                    // 归约
+                    // 缓存栈不变，分析栈讲第一个终结字符归约， 如果终结字符两侧是非终结字符，则三个字符一起替换
+                    NSString *expersionChar = [self foundExperssionChar:analyzeStack topElementWithAnalyzeSatck:topElementWithAnalyzeSatck];
+                    NSArray *expersion = [self foundExpression:contextDic value:expersionChar];
+                    [self removeElementFormAnalyeStack:analyzeStack expersionChar:expersionChar];
+                    [self pushElementToAnalyzeStack:expersion[0] analyzeStack:analyzeStack];
+                    // 保存
+                    NSString *value = [NSString stringWithFormat:@"%@%@%@%@%@, 用%@->%@归约", secondElementWithAnalyzeSatck, operateSymbolWithSecond, topElementWithAnalyzeSatck, operateSymbol, topElementWithContextSatck, expersion[0], expersion[1]];
+                    [self saveOperateAnalyzeResult:perateAnalyzeResultSteps anaylzeStack:analyzeStack contextStack:contextSatck value:value];
+                }else {
+                    // 错误
+                    return NO;
+                }
+            }
+        }
+    }
+    
+    return YES;
+}
+
+// 判断循环是不是结束了 结束了返回YES，没有结束返回NO；
+- (BOOL)isSuccessWithOperateAnalyze:(NSArray *)contextStack analyzeStack:(NSArray *)analyzeStack {
+    NSString *startSymbol = [NSString stringWithFormat:@"%c",[self.grammarDataTextView.string characterAtIndex:0]];
+    NSString *analyzeEnd = [NSString stringWithFormat:@"#%@",startSymbol];
+    BOOL isSuccess = NO;
+    
+    // 获取两个栈的元素
+    NSString *analyzeStr = [analyzeStack componentsJoinedByString:@""];
+    NSString *contextStr = [contextStack componentsJoinedByString:@""];
+    
+    if ([analyzeStr isEqualToString:analyzeEnd] && [contextStr isEqualToString:@"#"]) {
+        return YES;
+    }
+    
+    return isSuccess;
+}
+
+// 判断栈中的终结符个数
+- (NSInteger)numberOfTerminalSymbolInStack:(NSArray *)stack {
+    NSInteger numberOfTerminalSymbol = 0;
+    for (NSString *element in stack) {
+        if (![self currentCharIsNonTerminalSymbol:element]) {
+            numberOfTerminalSymbol ++;
+        }
+    }
+    return numberOfTerminalSymbol;
+}
+
+// 获取相应的运算符
+- (NSString *)gainOperateSymbolInOperatorPriorDic:(NSString *)topElementWithAnalyzeSatck topElementWithContextSatck:(NSString *)topElementWithContextSatck  {
+    return [[operatorPriorDic objectForKey:topElementWithAnalyzeSatck] objectForKey:topElementWithContextSatck];
+}
+
+// 归约
+- (NSArray *)foundExpression:(NSDictionary *)contextDic value:(NSString *)value {
+    // 找直接相同的表达式
+    for (NSString *key in nonTerminalSymbols) {
+        NSArray *expressions = [contextDic objectForKey:key];
+        for (NSString *expression in expressions) {
+            if ([expression isEqualToString:value]) {
+                return @[key, expression];
+            }
+        }
+    }
+    
+    // 找间接相等的：即终结符相等，非终结符不相等
+    NSMutableString *experssionChar = [NSMutableString string];
+    for (int  i = 0; i < [value length]; i++) {
+        NSString *element = [NSString stringWithFormat:@"%c",[value characterAtIndex:i]];
+        if ([self currentCharIsNonTerminalSymbol:element]) {
+            [experssionChar appendString:@"a"];
+        }else {
+            [experssionChar appendString:element];
+        }
+    }
+    
+    for (NSString *key in nonTerminalSymbols) {
+        NSArray *expressions = [contextDic objectForKey:key];
+        for (NSString *expression in expressions) {
+            if ([expression length] == [experssionChar length]) {
+                NSMutableString *experssionChar1 = [NSMutableString string];
+                for (int  i = 0; i < [expression length]; i++) {
+                    NSString *element = [NSString stringWithFormat:@"%c",[expression characterAtIndex:i]];
+                    if ([self currentCharIsNonTerminalSymbol:element]) {
+                        [experssionChar1 appendString:@"a"];
+                    }else {
+                        [experssionChar1 appendString:element];
+                    }
+                }
+                if ([experssionChar isEqualToString:experssionChar1]) {
+                    return @[key, expression];
+                }
+            }
+        }
+    }
+    
+//    if ([value length] == 3) {
+//        NSString *terminalSymbol = [NSString stringWithFormat:@"%c",[value characterAtIndex:1]];
+//        
+//        for (NSString *key in nonTerminalSymbols) {
+//            NSArray *expressions = [contextDic objectForKey:key];
+//            for (NSString *expression in expressions) {
+//                if ([expression rangeOfString:terminalSymbol].location != NSNotFound) {
+//                    if ([expression length] == 3) {
+//                        if ([self currentCharIsNonTerminalSymbol:[NSString stringWithFormat:@"%c",[expression characterAtIndex:0]]] && [self currentCharIsNonTerminalSymbol:[NSString stringWithFormat:@"%c",[expression characterAtIndex:2]]]) {
+//                            return @[key, expression];
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+    return nil;
+}
+
+- (void)saveOperateAnalyzeResult:(NSMutableArray *)operateAnalyzeResultSteps anaylzeStack:(NSArray *)analyzeStack contextStack:(NSArray *)contextStack value:(NSString *)value {
+    [operateAnalyzeResultSteps addObject:@{@"stepsNumber":@([operateAnalyzeResultSteps count] + 1), @"analyzeStack": [self arrayToString:analyzeStack], @"contextStack": [self arrayToString:contextStack], @"analyzeResult": value}];
+}
+
+// Stack 操作
+// 创建输入缓冲数组
+- (NSMutableArray *)createContextAnalyzeStack:(NSString *)contextNeedAnalyzeText {
+    NSMutableArray *contextNeedAnalyzeArr = [NSMutableArray array];
+    for (int i = 0; i < [contextNeedAnalyzeText length]; i++) {
+        [contextNeedAnalyzeArr addObject:[NSString stringWithFormat:@"%c",[contextNeedAnalyzeText characterAtIndex:i]]];
+    }
+    [contextNeedAnalyzeArr addObject:@"#"];
+    return contextNeedAnalyzeArr;
+}
+
+// 返回分析栈的栈顶元素
+- (NSString *)topElementWithAnalyzeStack:(NSArray *)analyzeStack {
+    NSString *topElement = @"";
+    for (int i = (int)[analyzeStack count] - 1; i >= 0 ; i--) {
+        NSString *element = [analyzeStack objectAtIndex:i];
+        if (![self currentCharIsNonTerminalSymbol:element]) {
+            topElement = element;
+            break;
+        }
+    }
+    return topElement;
+}
+
+// 返回第二个栈顶元素
+- (NSString *)secondElementWithAnalyzeStack:(NSArray *)analyzeStack {
+    NSString *topElement = @"";
+    int isSecond = 1;
+    for (int i = (int)[analyzeStack count] - 1; i >= 0 ; i--) {
+        NSString *element = [analyzeStack objectAtIndex:i];
+        if (![self currentCharIsNonTerminalSymbol:element]) {
+            topElement = element;
+            if (isSecond == 2) {
+                break;
+            }else {
+                isSecond ++;
+            }
+        }
+    }
+    return topElement;
+}
+
+// 返回归约的字符
+- (NSString *)foundExperssionChar:(NSArray *)analyzeStack topElementWithAnalyzeSatck:(NSString *)topElementWithAnalyzeSatck {
+    NSMutableString *experssionChar = [NSMutableString string];
+    int top = (int)[analyzeStack count] - 1;
+    NSString *newTopElementWithAnalyzeSatck = [topElementWithAnalyzeSatck copy];
+    
+    for (; top > 0; top--) {
+        if (![self currentCharIsNonTerminalSymbol:analyzeStack[top]]) {
+            NSString *termElement = analyzeStack[top];
+            if ([[self gainOperateSymbolInOperatorPriorDic:termElement topElementWithContextSatck:newTopElementWithAnalyzeSatck] isEqualToString:@"<"]) {
+                break;
+            }else {
+                newTopElementWithAnalyzeSatck = termElement;
+            }
+        }
+    }
+    
+    for (++top; top < [analyzeStack count]; top++) {
+        [experssionChar appendString:analyzeStack[top]];
+    }
+
+//    if ([self currentCharIsNonTerminalSymbol:[analyzeStack lastObject]]) {
+//        if (topElementWithAnalyzeSatck == analyzeStack[[analyzeStack count] - 2]) {
+//            if ([self currentCharIsNonTerminalSymbol:analyzeStack[[analyzeStack count] - 3]]) {
+//                [experssionChar appendFormat:@"%@",[analyzeStack lastObject]];
+//                [experssionChar appendFormat:@"%@",analyzeStack[[analyzeStack count] - 2]];
+//                [experssionChar appendFormat:@"%@",analyzeStack[[analyzeStack count] - 3]];
+//                return experssionChar;
+//            }
+//        }
+//    }
+    
+    return experssionChar;
+}
+
+// 压栈
+- (void)pushElementToAnalyzeStack:(NSString *)analyzeElement analyzeStack:(NSMutableArray *)analyzeStack {
+    [analyzeStack addObject:analyzeElement];
+}
+
+// 移栈
+- (void)removeElementFormAnalyeStack:(NSMutableArray *)analyzeStack expersionChar:(NSString *)expersionChar{
+    for (int i = 0; i < [expersionChar length]; i++) {
+//        NSString *removeElement = [NSString stringWithFormat:@"%c",[expersionChar characterAtIndex:i]];
+//        [analyzeStack removeObject:removeElement];
+        [analyzeStack removeLastObject]; 
+    }
+}
+
+- (void)removeElementFormContextStack:(NSMutableArray *)contextSatck {
+    [contextSatck removeObjectAtIndex:0];
+}
 
 #pragma mark - TableView 操作
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
     if (self.operatorPriorateDataTableView == tableView) {
         return  [[operatorPriorDic allKeys] count];
     }else if (self.operatorPriorateResultWithContextTableView == tableView) {
-        return [[operatorPriorResultDic allKeys] count];
+        return [operatorPriorResultArr count];
     }else {
         return 0;
     }
@@ -441,8 +699,7 @@
             return [dic objectForKey:channelsTitle];
         }
     }else if (self.operatorPriorateResultWithContextTableView == tableView) {
-        NSString *key = [operatorPriorResultDic allKeys][row];
-        NSDictionary *analyzeResultDic = [operatorPriorResultDic objectForKey:key];
+        NSDictionary *analyzeResultDic = [operatorPriorResultArr objectAtIndex:row];
         if([tableColumn.identifier isEqualToString:@"stepsNumber"] ) {
             return [analyzeResultDic objectForKey:@"stepsNumber"];
         }else if([tableColumn.identifier isEqualToString:@"analyzeStack"] ) {
@@ -450,12 +707,11 @@
         }else if([tableColumn.identifier isEqualToString:@"contextStack"] ) {
             return [analyzeResultDic objectForKey:@"contextStack"];
         }else {
-            return [analyzeResultDic objectForKey:@"analyzeExpression"];
+            return [analyzeResultDic objectForKey:@"analyzeResult"];
         }
     }else {
         return nil;
     }
-    
 }
 
 
@@ -493,9 +749,9 @@
 }
 
 // 判断当前字符是不是非终结符（关键字）， 是非终结符返回YES ，否则返回NO
-- (BOOL)currentCharIsNonTerminalSymbol:(NSString *)currentChar keys:(NSArray *)keys {
+- (BOOL)currentCharIsNonTerminalSymbol:(NSString *)currentChar{
     BOOL isKey = NO;
-    for (NSString *key in keys) {
+    for (NSString *key in nonTerminalSymbols) {
         if ([key isEqualToString:currentChar]) {
             isKey = YES;
             break;
@@ -503,6 +759,18 @@
     }
     return isKey;
 }
+
+- (NSString *)arrayToString:(NSArray *)arr {
+    // 对数据进行处理
+    NSMutableString *allValue = [NSMutableString string];
+    for (NSString *value in arr) {
+        [allValue appendFormat:@"%@", value];
+    }
+    
+    return allValue;
+}
+
+
 
 
 @end
