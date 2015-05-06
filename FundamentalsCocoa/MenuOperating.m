@@ -86,14 +86,6 @@
 
 #pragma mark - 编译
 - (IBAction)fundamentalCode:(id)sender {
-    ViewController *mainViewController = [self gainMainViewController];
-    
-    if (!fundamentalsResultViewController) {
-        fundamentalsResultViewController = [[FundamentalsResultPanelViewController alloc] initWithWindowNibName:@"FundamentalsResultPanelViewController"];
-    }
-    
-    [fundamentalsResultViewController showWindow:self];
-    fundamentalsResultViewController.showFunResultTextView.string = mainViewController.showCodeTextView.string;
 }
 
 #pragma mark - LL1 预测分析
@@ -118,7 +110,22 @@
     // 将 获取的数据传递给 ViewController 的 TextView
     ViewController *mainViewController = [self gainMainViewController];
     GrammaticalAnalysisClass *grammaticalAnalysis = [[GrammaticalAnalysisClass alloc] init];
-    [grammaticalAnalysis grammaticalAnalysis:mainViewController.symbolFormCodeTypeArr];
+    [grammaticalAnalysis grammaticalAnalysis:mainViewController.tokenFormCodeTypeArr];
+    
+    
+    // 数据展示
+    if (!fundamentalsResultViewController) {
+        fundamentalsResultViewController = [[FundamentalsResultPanelViewController alloc] initWithWindowNibName:@"FundamentalsResultPanelViewController"];
+    }
+    [fundamentalsResultViewController showWindow:self];
+    
+    // 将 词法分析 的正确部分 放到主界面的相应位置
+    [fundamentalsResultViewController transformInfoRightToTextView:grammaticalAnalysis.analyzeResultList];
+    
+    // 将 词法分析 的错误部分 放到主界面的相应位置
+    fundamentalsResultViewController.analyzeFalseInfoTextView.string = [self dealWithFalseInfo:grammaticalAnalysis.falseList];
+    
+    
 }
 
 

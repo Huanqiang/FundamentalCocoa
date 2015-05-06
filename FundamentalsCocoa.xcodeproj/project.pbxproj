@@ -169,9 +169,9 @@
 			isa = PBXGroup;
 			children = (
 				E6B6AFB31AE63F05008E9C30 /* Function Class */,
-				E6A247211AF07FB4001B8F02 /* Operator Priorate */,
 				E602D3A21AE74A7E0050E2A2 /* Grammatical Analysis */,
 				E6B6AFB71AE63FA0008E9C30 /* LL1 */,
+				E6A247211AF07FB4001B8F02 /* Operator Priorate */,
 				E680A0691AD5089D0063C2C5 /* Code Type  */,
 				E680A0681AD4FF6A0063C2C5 /* Fundamentals Result View Controller */,
 				E6F034921AD3ABCC002B6B65 /* Menu */,

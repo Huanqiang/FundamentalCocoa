@@ -10,9 +10,12 @@
 
 @interface FundamentalsResultPanelViewController ()
 
+
 @end
 
 @implementation FundamentalsResultPanelViewController
+@synthesize analyzeFalseInfoTextView;
+@synthesize analyzeRightInfoTextView;
 
 - (id)init {
     self = [super initWithWindowNibName:@"FundamentalsResultPanelViewController"];
@@ -24,6 +27,14 @@
     [super windowDidLoad];
     
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
+}
+
+- (void)transformInfoRightToTextView:(NSArray *)infoList {
+    NSMutableString *rightInfo = [NSMutableString string];
+    for (NSString *info in infoList) {
+        [rightInfo appendFormat:@"%@\n", info];
+    }
+    self.analyzeRightInfoTextView.string = rightInfo;
 }
 
 @end

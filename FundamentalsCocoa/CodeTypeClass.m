@@ -16,8 +16,9 @@
 - (id)init {
     self = [super init];
     if (self) {
-        keywordArray = [NSArray arrayWithObjects:@"auto", @"double", @"int", @"struct", @"break", @"else", @"long", @"switch", @"case", @"enum", @"register", @"typedef",@"char",@"extern", @"return", @"union", @"const", @"float", @"short", @"unsigned", @"continue", @"for", @"signed", @"void", @"default", @"goto", @"sizeof", @"volatile", @"do", @"if", @"while", @"static", nil];
-        operatorArray = [NSArray arrayWithObjects:@"+",@"-",@"*",@"/",@"%",@">",@"<",@">=",@"<=",@"==", @"-=",@"+=", @"*=",@"/=",@"!=",@"=",@"%=",@"&",@"&&",@"|",@"||",@"!",@"++",@"--",@"~",@"<<",@">>",@"?:", nil];
+        keywordArray = [NSArray arrayWithObjects:@"program",@"var", @"integer", @"bool", @"real", @"char", @"const", @"begin", @"if",  @"end",@"then", @"else", @"while", @"do", @"repeat", @"until", @"for", @"to", @"not", @"and", @"or", nil];
+//        @"auto", @"double", @"int", @"struct", @"break", @"else", @"long", @"switch", @"case", @"enum", @"register", @"typedef",@"char",@"extern", @"return", @"union", @"const", @"float", @"short", @"unsigned", @"continue", @"for", @"signed", @"void", @"default", @"goto", @"sizeof", @"volatile", @"do", @"if", @"while", @"static", nil];
+        operatorArray = [NSArray arrayWithObjects:@"+",@"-",@"*",@"/",@"%",@">",@"<",@">=",@"<=",@"==", @"-=",@"+=", @"*=",@"/=",@"!=",@"=",@"%=",@"&",@"&&",@"|",@"||",@"!",@"++",@"--",@"~",@"<<",@">>",@"?:", @"<>", @":=", nil];
         boundaryRiverArray = [NSArray arrayWithObjects: @"{", @"}", @"[", @"]", @";", @",", @".", @"(", @")", @":", @"\"", @"#", @">", @"<", @"\'", nil];
     }
     

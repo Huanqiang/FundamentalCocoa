@@ -54,7 +54,7 @@
             // 判断是不是数字
             i = [self phraseIsNumber:fileContextAtRow index:i row:row];
             
-        }else if (currentChar == '\'' || currentChar == '"') {
+        }else if (currentChar == '\'' || currentChar == '\"') {
             // 说明接下来的 是一个字符常量 或者字符串常量
             i = [self phraseIsCharacterString:fileContextAtRow index:i row:row];
             
@@ -73,7 +73,9 @@
         }else {
             // 处理其他情况 如 界符, 运算符 等
             NSString *currentCharString = [NSString stringWithFormat:@"%c", currentChar];
-            if ([codeTypeClass isBelongsBoundaryRiverArray:currentCharString] != -1) {
+            if ([currentCharString isEqualToString:@":"]) {
+                i = [self phraseIsColon:fileContextAtRow index:i row:row];
+            }else if ([codeTypeClass isBelongsBoundaryRiverArray:currentCharString] != -1) {
 
                 NSInteger boundaryRiverIndex = [codeTypeClass isBelongsBoundaryRiverArray:currentCharString];
                 NSInteger token = boundaryRiverIndex + [codeTypeClass.keywordArray count] + [codeTypeClass.operatorArray count];
@@ -85,7 +87,7 @@
                 // 运算符要注意下一个字符还是不是运算符，是的话两个一起判断，不是的话保存
                 i = [self phraseIsBelongsOperator:fileContextAtRow index:i row:row];
             }else {
-                if (![currentCharString isEqualToString:@" "]) {
+                if (![currentCharString isEqualToString:@" "] && ![currentCharString isEqualToString:@"\r"]) {
                     [self saveToFalse:currentCharString rowNumber:row];
                 }
 
@@ -276,14 +278,12 @@
         char nextChar = [fileContextOfRow characterAtIndex:++index];
         phrase = [NSString stringWithFormat:@"%c%c", currentChar, nextChar];
     }
-    
-    
+
     if ([codeTypeClass isBelongsOperatorArray:phrase] != -1) {
         index++;
         NSInteger operatorToken = [codeTypeClass isBelongsOperatorArray:phrase] + [codeTypeClass.keywordArray count];
         [self saveToToken:[self createRightWord:phrase codeType:operatorToken rowNumber:row]];
     }else {
-        
         NSString *operatorString = [NSString stringWithFormat:@"%c", currentChar];
         NSInteger operatorToken = [codeTypeClass isBelongsOperatorArray:operatorString] + [codeTypeClass.keywordArray count];
         [self saveToToken:[self createRightWord:operatorString codeType:operatorToken rowNumber:row]];
@@ -292,6 +292,28 @@
     return index;
 }
 
+
+- (int)phraseIsColon:(NSString *)fileContextOfRow index:(int)index row:(NSInteger)row {
+    char currentChar = [fileContextOfRow characterAtIndex:index];
+    NSString *phrase = [NSString stringWithFormat:@"%c", currentChar];
+    if (index != [fileContextOfRow length] - 1) {
+        char nextChar = [fileContextOfRow characterAtIndex:++index];
+        phrase = [NSString stringWithFormat:@"%c%c", currentChar, nextChar];
+    }
+    
+    if ([phrase isEqualToString:@":="]) {
+        index++;
+        NSInteger operatorToken = [codeTypeClass isBelongsOperatorArray:phrase] + [codeTypeClass.keywordArray count];
+        [self saveToToken:[self createRightWord:phrase codeType:operatorToken rowNumber:row]];
+    }else {
+        NSString *colonString = [NSString stringWithFormat:@"%c", currentChar];
+        NSInteger boundaryRiverIndex = [codeTypeClass isBelongsBoundaryRiverArray:colonString];
+        NSInteger token = boundaryRiverIndex + [codeTypeClass.keywordArray count] + [codeTypeClass.operatorArray count];
+        [self saveToToken:[self createRightWord:colonString codeType:token rowNumber:row]];
+    }
+    
+    return index;
+}
 
 
 

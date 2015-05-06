@@ -10,6 +10,9 @@
 
 @interface GrammaticalAnalysisClass : NSObject
 
+@property (nonatomic, strong) NSMutableArray *analyzeResultList;
+@property (nonatomic, strong) NSMutableArray *falseList;
+
 - (void)grammaticalAnalysis:(NSArray *)fileContext;
 
 @end

@@ -10,6 +10,10 @@
 
 @interface FundamentalsResultPanelViewController : NSWindowController
 
-@property (unsafe_unretained) IBOutlet NSTextView *showFunResultTextView;
+@property (unsafe_unretained) IBOutlet NSTextView *analyzeRightInfoTextView;
+@property (unsafe_unretained) IBOutlet NSTextView *analyzeFalseInfoTextView;
+
+- (void)transformInfoRightToTextView:(NSArray *)infoList;
+
 
 @end

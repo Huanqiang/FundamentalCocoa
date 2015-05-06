@@ -54,10 +54,22 @@
 
 // 确认文法的格式
 - (IBAction)sureFileFormat:(id)sender {
-    
+    self.grammarDataTextView.string = [self removeBlank:self.grammarDataTextView.string];
 }
 
-
+// 去除 空格
+- (NSString *)removeBlank:(NSString *)rowContext {
+    NSArray *blankOtherArr = [rowContext componentsSeparatedByString:@" "];
+    NSMutableString *newRowContext = [NSMutableString string];
+    
+    for (NSString *otherString in blankOtherArr) {
+        [newRowContext appendString:otherString];
+    }
+    // 增加 换行符
+    [newRowContext appendString:@"\r\n"];
+    
+    return newRowContext;
+}
 
 #pragma mark - 求 FirstVT集 和 LastVT集
 - (IBAction)foundFirstVTCollection:(id)sender {
