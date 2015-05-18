@@ -60,12 +60,15 @@
     }
     
     [self saveResultInfo:@"程序分析结束"];
+    // 在分析完之后，加入 程序结束的翻译；
+    [self saveQuaternionToList:[self gainNewQuaternion:@"sys" arg1:@"" arg2:@"" result:@""]];
 }
 
 
 #pragma mark - 处理判断头部
 - (void)analyzeHead {
     // 记录识别信息
+    NSString *programName = @"";
     [self saveResultInfo:@"开始识别头部"];
     
     NSString *token = [self gainNextToken];
@@ -82,6 +85,7 @@
             [self saveFalseInfo:@"函数名称错误，请自定义！"];
         }
     }else {
+        programName = token;
         [self saveResultInfo:[NSString stringWithFormat:@"\t本程序函数名是：%@", token]];
     }
     
@@ -89,6 +93,9 @@
     if (![token isEqualToString:@";"]) {
         [self saveFalseInfo:@"缺少';'"];
     }
+    
+    // 在处理完头部之后，加入 程序开始的翻译；
+    [self saveQuaternionToList:[self gainNewQuaternion:@"program" arg1:programName arg2:@"" result:@""]];
 }
 
 #pragma mark - 处理静态变量
@@ -371,6 +378,7 @@
         [self saveQuaternionToList:quaternion];
     }
     
+    NSString *wayWithTo = @"";
     // 判断 to， 处理 算术表达式
     token = [self gainNextToken];
     if ([token isEqualToString:@"to"]) {
@@ -380,6 +388,7 @@
         // 产生一个大于的判断式子，符合条件就跳转到结束
         NSDictionary *quaternion = [self gainNewQuaternion:@"j>" arg1:identifier arg2:nilString result:@"0"];
         [self saveQuaternionToList:quaternion];
+        wayWithTo = [self gainQuaternionSerialNumber];
     }else {
         [self saveFalseInfo:@"For 循环缺少 to 部分"];
     }
@@ -396,7 +405,11 @@
         [self saveQuaternionToList:[self gainNewQuaternion:@"+" arg1:identifier arg2:@"1" result:temporaryVar]];
         // 再做 i = t
         [self saveQuaternionToList:[self gainNewQuaternion:@":=" arg1:temporaryVar arg2:@"" result:identifier]];
-        
+        // 处理完 do 后，要无条件跳转至判断语句之前,即 to 语句
+        NSMutableDictionary *booleanDic = [self createNullBooleanDic];
+        booleanDic[@"result"] = wayWithTo;
+        [self saveQuaternionToList:booleanDic];
+
     }else {
         [self saveFalseInfo:@"For 循环缺少 do 部分"];
     }
@@ -454,12 +467,12 @@
         [self saveResultInfo:@"\t处理 while 部分"];
         [self dealWithBooleanExpression:&realWay falseWay:&falseWay];
         
-        // 在真出口回填之前先加入一条无条件回跳到do语句的四元式
+        // 在真出口回填之后再加入一条无条件回跳到do语句的四元式
+        [self backPatch:rightSemanticQuaternionList];
         NSMutableDictionary *booleanDic = [self createNullBooleanDic];
         booleanDic[@"result"] = realWayWithDo;
         [self saveQuaternionToList:booleanDic];
         
-        [self backPatch:rightSemanticQuaternionList];
     }else {
         [self saveFalseInfo:@"Do-While 语句缺少 while 部分"];
         return ;
