@@ -30,4 +30,18 @@
     }];
 }
 
+#pragma  mark - 保存信息 至 文件
+- (void)saveSymbolToFile:(NSArray *)symbolArr {
+    [symbolArr writeToFile:[self filePath:@"symbol"] atomically:YES];
+}
+
+- (void)saveTokenToFile:(NSArray *)tokenArr {
+    [tokenArr writeToFile:[self filePath:@"Token"] atomically:YES];
+}
+
+
+- (NSString *)filePath:(NSString *)fileNmae {
+    return [NSString stringWithFormat:@"/Users/wanghuanqiang/Desktop/%@.txt", fileNmae];
+}
+
 @end

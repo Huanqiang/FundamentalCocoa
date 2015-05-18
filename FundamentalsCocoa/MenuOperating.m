@@ -63,8 +63,10 @@
     mainViewController.showResultTextView.string = [self dealWithFalseInfo:codeTypeOperating.falseWordArr];
     
     // 保存 至 文件
-    [codeTypeOperating saveSymbolToFile];
-    [codeTypeOperating saveTokenToFile];
+    // 将语法分析结果保存至文件
+    FileOperateClass *fileOperateClass = [[FileOperateClass alloc] init];
+    [fileOperateClass saveSymbolToFile:codeTypeOperating.symbolArr];
+    [fileOperateClass saveTokenToFile:codeTypeOperating.tokenArr];
 }
 
 
@@ -110,8 +112,7 @@
     // 将 获取的数据传递给 ViewController 的 TextView
     ViewController *mainViewController = [self gainMainViewController];
     GrammaticalAnalysisClass *grammaticalAnalysis = [[GrammaticalAnalysisClass alloc] init];
-    [grammaticalAnalysis grammaticalAnalysis:mainViewController.tokenFormCodeTypeArr];
-    
+    [grammaticalAnalysis grammaticalAnalysis:mainViewController.tokenFormCodeTypeArr symbolInfoList:mainViewController.symbolFormCodeTypeArr];    
     
     // 数据展示
     if (!fundamentalsResultViewController) {
@@ -119,13 +120,17 @@
     }
     [fundamentalsResultViewController showWindow:self];
     
-    // 将 词法分析 的正确部分 放到主界面的相应位置
+    
+    
+    // 将 语法分析 的正确部分 放到主界面的相应位置
     [fundamentalsResultViewController transformInfoRightToTextView:grammaticalAnalysis.analyzeResultList];
     
-    // 将 词法分析 的错误部分 放到主界面的相应位置
+    // 将 语法分析 的错误部分 放到主界面的相应位置
     fundamentalsResultViewController.analyzeFalseInfoTextView.string = [self dealWithFalseInfo:grammaticalAnalysis.falseList];
     
-    
+    // 将语法分析结果保存至文件
+    FileOperateClass *fileOperateClass = [[FileOperateClass alloc] init];
+    [fileOperateClass saveSymbolToFile:grammaticalAnalysis.symbolAnalyzeResultList];
 }
 
 

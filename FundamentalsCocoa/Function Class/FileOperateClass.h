@@ -19,7 +19,8 @@
  */
 - (void)openFileWithSelectFolder:(NSWindow *)openWindow gainData:(void (^)(NSString *result))gainData;
 
-//- (void)saveFile:(NSString)filePath 
+- (void)saveSymbolToFile:(NSArray *)symbolArr;
+- (void)saveTokenToFile:(NSArray *)tokenArr;
 
 
 @end

@@ -11,8 +11,10 @@
 @interface GrammaticalAnalysisClass : NSObject
 
 @property (nonatomic, strong) NSMutableArray *analyzeResultList;
+@property (nonatomic, strong) NSMutableArray *symbolAnalyzeResultList;
 @property (nonatomic, strong) NSMutableArray *falseList;
+@property (nonatomic, strong) NSMutableArray *quaternionList;
 
-- (void)grammaticalAnalysis:(NSArray *)fileContext;
+- (void)grammaticalAnalysis:(NSArray *)fileContext symbolInfoList:(NSArray *)SymbolInfoList;
 
 @end
