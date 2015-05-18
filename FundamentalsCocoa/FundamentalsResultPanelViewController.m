@@ -16,10 +16,10 @@
 @implementation FundamentalsResultPanelViewController
 @synthesize analyzeFalseInfoTextView;
 @synthesize analyzeRightInfoTextView;
+@synthesize analyzeQuaternionInfoTextView;
 
 - (id)init {
     self = [super initWithWindowNibName:@"FundamentalsResultPanelViewController"];
-//    self.showFunResultTextView = [[NSTextView alloc] init];
     return self;
 }
 
@@ -35,6 +35,14 @@
         [rightInfo appendFormat:@"%@\n", info];
     }
     self.analyzeRightInfoTextView.string = rightInfo;
+}
+
+- (void)transformInfoQuaternionToTextView:(NSArray *)quaternionList {
+    NSMutableString *quaternionInfo = [NSMutableString string];
+    for (NSDictionary *quaternion in quaternionList) {
+        [quaternionInfo appendFormat:@"%@ ( %@, %@, %@, %@) \n", quaternion[@"serialNumber"], quaternion[@"op"], quaternion[@"arg1"], quaternion[@"arg2"], quaternion[@"result"]];
+    }
+    self.analyzeQuaternionInfoTextView.string = quaternionInfo;
 }
 
 @end

@@ -12,8 +12,10 @@
 
 @property (unsafe_unretained) IBOutlet NSTextView *analyzeRightInfoTextView;
 @property (unsafe_unretained) IBOutlet NSTextView *analyzeFalseInfoTextView;
+@property (unsafe_unretained) IBOutlet NSTextView *analyzeQuaternionInfoTextView;
 
 - (void)transformInfoRightToTextView:(NSArray *)infoList;
+- (void)transformInfoQuaternionToTextView:(NSArray *)quaternionList;
 
 
 @end

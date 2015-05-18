@@ -124,9 +124,10 @@
     
     // 将 语法分析 的正确部分 放到主界面的相应位置
     [fundamentalsResultViewController transformInfoRightToTextView:grammaticalAnalysis.analyzeResultList];
-    
     // 将 语法分析 的错误部分 放到主界面的相应位置
     fundamentalsResultViewController.analyzeFalseInfoTextView.string = [self dealWithFalseInfo:grammaticalAnalysis.falseList];
+    // 将 语义分析 放到主界面的相应位置
+    [fundamentalsResultViewController transformInfoQuaternionToTextView:grammaticalAnalysis.quaternionList];
     
     // 将语法分析结果保存至文件
     FileOperateClass *fileOperateClass = [[FileOperateClass alloc] init];

@@ -290,12 +290,16 @@
 - (void)dealWithIf {
     // if函数已经处理了"if"，现在开始处理布尔表达式 （括号在布尔表达式中判断）
     [self saveResultInfo:@"开始处理 if 语句"];
-    [self dealWithBooleanExpression];
+    NSString *realWay = @"";
+    NSString *falseWay = @"";
+    [self dealWithBooleanExpression:&realWay falseWay:&falseWay];
     
     // 再判断 then，处理执行语句
     NSString *token = [self gainNextToken];
     if ([token isEqualToString:@"then"]) {
         [self saveResultInfo:@"\t处理 then 部分"];
+        // 在处理之前先进行真出口回填
+        [self backPatch:rightSemanticQuaternionList];
         [self selectOperater:@"\t\t"];
     }else {
         [self saveFalseInfo:@"if语句缺少 then 部分"];
@@ -306,19 +310,36 @@
     token = [self gainNextToken];
     if ([token isEqualToString:@"else"]) {
         [self saveResultInfo:@"\t处理 else 部分"];
+        // 如果有 else 则说明要加一句 then的无条件跳转。并在做完 else后 回填
+        [self saveQuaternionToList:[self createNullBooleanDic]];
+        
+        // 在处理之前先进行假出口回填
+        [self backPatch:falseSemanticQuaternionList];
         [self dealWithExecStatement:@"\t\t"];
+        
+        // 回填then 无条件跳转出口
+        NSString *currentWay = [NSString stringWithFormat:@"%@", @([quaternionList count] + 1)];
+        for (NSMutableDictionary *booleanDic in quaternionList) {
+            if ([booleanDic[@"result"] isEqualToString:@"0"]) {
+                booleanDic[@"result"] = currentWay;
+            }
+        }
+        
     }else {
         [self tokenToPre];
+        // 在处理之前先进行假出口回填
+        [self backPatch:falseSemanticQuaternionList];
     }
+    
 }
 
 - (void)dealWithFor {
     [self saveResultInfo:@"开始处理 For 循环"];
     // 一开始 一定是 "标识符 := 算术表达式 "
     [self saveResultInfo:@"\t开始处理标识符赋值"];
-//    [self dealWithAssignmentExpression:@"\t\t"];
     
     NSMutableString *resultInfo = [NSMutableString string];
+    NSString *identifier = @"";
     BOOL isRight = YES;
     // 第一个字符是 标识符
     NSString *token = [self gainNextToken];
@@ -326,6 +347,8 @@
     if (![self isIdentifier]) {
         isRight = NO;
         [self saveFalseInfo:@"赋值表达式缺少 标识符"];
+    }else {
+        identifier = token;
     }
     [resultInfo appendString:token];
     
@@ -343,6 +366,9 @@
     [resultInfo appendString:[self dealWithArithmeticExpression:&temporaryVar]];
     if (isRight) {
         [self saveResultInfo:[NSString stringWithFormat:@"\t\t\t%@",resultInfo]];
+        // 为该赋值式子产生一个四元式
+        NSDictionary *quaternion = [self gainNewQuaternion:@":=" arg1:temporaryVar arg2:@"" result:identifier];
+        [self saveQuaternionToList:quaternion];
     }
     
     // 判断 to， 处理 算术表达式
@@ -351,6 +377,9 @@
         [self saveResultInfo:@"\t开始处理 to 部分"];
         NSString *nilString = @"";
         [self saveResultInfo:[NSString stringWithFormat:@"\t\t%@",[self dealWithArithmeticExpression:&nilString]]];
+        // 产生一个大于的判断式子，符合条件就跳转到结束
+        NSDictionary *quaternion = [self gainNewQuaternion:@"j>" arg1:identifier arg2:nilString result:@"0"];
+        [self saveQuaternionToList:quaternion];
     }else {
         [self saveFalseInfo:@"For 循环缺少 to 部分"];
     }
@@ -360,42 +389,83 @@
     if ([token isEqualToString:@"do"]) {
         [self saveResultInfo:@"\t开始处理 do 执行语句部分"];
         [self selectOperater:@"\t\t"];
+        
+        // 开始做 i++ 的 四元式处理
+        // 先做 t = i + 1
+        NSString *temporaryVar = [self gainNewTemporaryVar];
+        [self saveQuaternionToList:[self gainNewQuaternion:@"+" arg1:identifier arg2:@"1" result:temporaryVar]];
+        // 再做 i = t
+        [self saveQuaternionToList:[self gainNewQuaternion:@":=" arg1:temporaryVar arg2:@"" result:identifier]];
+        
     }else {
         [self saveFalseInfo:@"For 循环缺少 do 部分"];
+    }
+    
+    // 回填 不符合条件就跳转到结束 的四元式
+    NSString *currentWay = [NSString stringWithFormat:@"%@", @([quaternionList count] + 1)];
+    for (NSMutableDictionary *booleanDic in quaternionList) {
+        if ([booleanDic[@"result"] isEqualToString:@"0"]) {
+            booleanDic[@"result"] = currentWay;
+        }
     }
 }
 
 - (void)dealWithWhile {
     [self saveResultInfo:@"开始处理 While 循环"];
     // 开始处理布尔表达式 （括号在布尔表达式中判断）
-    [self dealWithBooleanExpression];
+    NSString *realWay = @"";
+    NSString *falseWay = @"";
+    [self dealWithBooleanExpression:&realWay falseWay:&falseWay];
+    // 在处理do语句 之前先进行真出口回填
+    [self backPatch:rightSemanticQuaternionList];
     
     // 处理do 即执行语句
     NSString *token = [self gainNextToken];
     if ([token isEqualToString:@"do"]) {
         [self saveResultInfo:@"\t处理 do 部分"];
         [self selectOperater:@"\t\t"];
+        
+        // 处理完 do 后，要无条件跳转至判断语句之前,即rightSemanticQuaternionList集的首元素的序号
+        NSDictionary *firstObjectWithSemantic = [rightSemanticQuaternionList firstObject];
+        NSMutableDictionary *booleanDic = [self createNullBooleanDic];
+        booleanDic[@"result"] = firstObjectWithSemantic[@"serialNumber"];
+        [self saveQuaternionToList:booleanDic];
     }else {
         [self saveFalseInfo:@"While语句缺少 do 部分"];
         return ;
     }
+    
+    // 在处理do语句 之后再进行假出口回填
+    [self backPatch:falseSemanticQuaternionList];
 }
 
 - (void)dealWithDoWhile {
     [self saveResultInfo:@"开始处理 Do-While 循环"];
     // 处理 do 的执行语句
+    NSString *realWayWithDo = [NSString stringWithFormat:@"%lu",[quaternionList count] + 1];
     [self saveResultInfo:@"\t处理 do 部分"];
     [self selectOperater:@"\t\t"];
+    NSString *realWay = @"";
+    NSString *falseWay = @"";
     
-    // 处理do 即执行语句
+    // 处理do-while 的判断语句
     NSString *token = [self gainNextToken];
     if ([token isEqualToString:@"while"]) {
         [self saveResultInfo:@"\t处理 while 部分"];
-        [self dealWithBooleanExpression];
+        [self dealWithBooleanExpression:&realWay falseWay:&falseWay];
+        
+        // 在真出口回填之前先加入一条无条件回跳到do语句的四元式
+        NSMutableDictionary *booleanDic = [self createNullBooleanDic];
+        booleanDic[@"result"] = realWayWithDo;
+        [self saveQuaternionToList:booleanDic];
+        
+        [self backPatch:rightSemanticQuaternionList];
     }else {
         [self saveFalseInfo:@"Do-While 语句缺少 while 部分"];
         return ;
     }
+    // 处理do-while 的判断语句 之后再进行假出口回填
+    [self backPatch:falseSemanticQuaternionList];
 }
 
 -  (void)dealWithRepeat {
@@ -404,11 +474,14 @@
     [self saveResultInfo:@"\t处理执行语句部分"];
     [self selectOperater:@"\t\t"];
     
+    NSString *realWay = @"";
+    NSString *falseWay = @"";
+    
     // 处理until 即执行语句
     NSString *token = [self gainNextToken];
     if ([token isEqualToString:@"until"]) {
         [self saveResultInfo:@"\t处理 until 部分"];
-        [self dealWithBooleanExpression];
+        [self dealWithBooleanExpression:&realWay falseWay:&falseWay];
     }else {
         [self saveFalseInfo:@"Repeat 语句缺少 until 部分"];
         return ;
@@ -520,18 +593,20 @@
 }
 
 #pragma mark - 处理布尔表达式
-- (void)dealWithBooleanExpression {
+- (void)dealWithBooleanExpression:(NSString **)realWay falseWay:(NSString **)falseWay {
     [self saveResultInfo:@"\t处理布尔表达式"];
-    NSDictionary *booleanDic = @{@"op": @"", @"arg1": @"", @"ar2": @""};
 
     // 先判断 not，有的话再 判断 "（算术表达式）"; 不是的话，直接判断 "（算术表达式）"
     NSString *token = [self gainNextToken];
-    if ([token isEqualToString:@"not"]) {
-        [self saveResultInfo:[NSString stringWithFormat:@"\t\tnot部分：%@",[self dealWithBooleanExpressionWithBracket:booleanDic]]];
-    }else if ([token isEqualToString:@"("]) {
+    if ([token isEqualToString:@"not"] || [token isEqualToString:@"("]) {
         // 处理 左括号
         [self tokenToPre];
-        [self saveResultInfo:[NSString stringWithFormat:@"\t\t%@",[self dealWithBooleanExpressionWithBracket:booleanDic]]];
+        if ([token isEqualToString:@"not"]) {
+            [self saveResultInfo:[NSString stringWithFormat:@"\t\tnot部分：%@",[self dealWithBooleanExpressionWithBracket:realWay falseWay:falseWay]]];
+        }else {
+            [self saveResultInfo:[NSString stringWithFormat:@"\t\t%@",[self dealWithBooleanExpressionWithBracket:realWay falseWay:falseWay]]];
+        }
+        
     }else {
         [self saveFalseInfo:@"布尔表达式缺少 左括号"];
     }
@@ -539,8 +614,23 @@
     while (1) {
         // 判断是 and， 是的话，继续 判断 "（算术表达式）";
         NSString *token = [self gainNextToken];
-        if ([token isEqualToString:@"and"] || [token isEqualToString:@"or"]) {
-            [self saveResultInfo:[NSString stringWithFormat:@"\t\t%@部分：%@", token, [self dealWithBooleanExpressionWithBracket:booleanDic]]];
+        if ([token isEqualToString:@"and"]) {
+            [self saveResultInfo:[NSString stringWithFormat:@"\t\t%@部分：%@", token, [self dealWithBooleanExpressionWithBracket:realWay falseWay:falseWay]]];
+            
+            // 处理前一个的真出口
+            [self dealWithPriBooleanWay:rightSemanticQuaternionList];
+            // 处理将假出口合并
+            [self dealWithBoolenWay:falseSemanticQuaternionList currentWay:*falseWay];
+            
+        }else if ([token isEqualToString:@"or"]) {
+            
+            [self saveResultInfo:[NSString stringWithFormat:@"\t\t%@部分：%@", token, [self dealWithBooleanExpressionWithBracket:realWay falseWay:falseWay]]];
+            
+            // 处理前一个的假出口
+            [self dealWithPriBooleanWay:falseSemanticQuaternionList];
+            // 处理将真出口合并
+            [self dealWithBoolenWay:rightSemanticQuaternionList currentWay:*realWay];
+            
         }else {
             [self tokenToPre];
             break;
@@ -548,19 +638,55 @@
     }
 }
 
-- (void)dealWithBooleanExpressionWithNot {
+// 处理前一个出口
+- (void)dealWithPriBooleanWay:(NSMutableArray *)semQuaternionList {
+    NSMutableDictionary *priBoolenDic = [semQuaternionList objectAtIndex:[semQuaternionList count] - 2];
+    NSMutableDictionary *lastBoolenDic = [semQuaternionList lastObject];
     
+    for (NSMutableDictionary *booleanDic in semQuaternionList) {
+        if ([booleanDic[@"result"] isEqualToString:priBoolenDic[@"result"]]) {
+            booleanDic[@"result"] = lastBoolenDic[@"serialNumber"];
+        }
+    }
 }
 
+// 合并出口
+- (void)dealWithBoolenWay:(NSMutableArray *)semQuaternionList currentWay:(NSString *)currentWay {
+    NSMutableDictionary *priBoolenDic = [semQuaternionList objectAtIndex:[semQuaternionList count] - 2];
+    NSString *priWay = priBoolenDic[@"result"];
+    
+    for (NSMutableDictionary *booleanDic in semQuaternionList) {
+        if ([booleanDic[@"result"] isEqualToString:priWay]) {
+            booleanDic[@"result"] = currentWay;
+        }
+    }
+}
+
+
 // 处理布尔表达式里的判断 （带括号）
-- (NSString *)dealWithBooleanExpressionWithBracket:(NSDictionary *)booleanDic {
+- (NSString *)dealWithBooleanExpressionWithBracket:(NSString **)realWay falseWay:(NSString **)falseWay {
     NSMutableString *resultInfo = [NSMutableString string];
+    NSMutableDictionary *booleanDic = [self createNullBooleanDic];
     // 处理左括号
     NSString *token = [self gainNextToken];
+    
+    // 先判断 not，有的话再 判断 "（算术表达式）"
+    if ([token isEqualToString:@"not"]) {
+        resultInfo = [NSMutableString stringWithFormat:@"not：%@",[self dealWithBooleanExpressionWithBracket:realWay falseWay:falseWay]];
+        // 因为是not ，所以交换真假出口
+        NSString *term = @"";
+        term = *realWay;
+        *realWay = *falseWay;
+        *falseWay = term;
+        
+        return resultInfo;
+    }
+    
     if (![token isEqualToString:@"("]) {
         [self tokenToPre];
         [self saveFalseInfo:@"布尔表达式缺少 左括号"];
     }
+    
     NSString *arithmeticResult = @"";
     [resultInfo appendString:[self dealWithArithmeticExpression:&arithmeticResult]];
     [booleanDic setValue:arithmeticResult forKey:@"arg1"];
@@ -568,10 +694,15 @@
     // 判断是否为 比较符号
     token = [self gainNextToken];
     if (![self isCompareSymbol]) {
+        // 不是比较符号，说明是常量
+
+        // 创建 四元式，并返回真假出口
+        [self createBooleanQuaternion:booleanDic trueWay:realWay falseWay:falseWay];
+        
         return resultInfo;
     }else {
         [resultInfo appendString:token];
-        [booleanDic setValue:token forKey:@"op"];
+        [booleanDic setValue:[NSString stringWithFormat:@"j%@", token] forKey:@"op"];
     }
     
     // 处理 符号右边
@@ -585,9 +716,11 @@
         [self saveFalseInfo:@"布尔表达式缺少 右括号"];
     }
     
+    // 创建 四元式，并返回真假出口
+    [self createBooleanQuaternion:booleanDic trueWay:realWay falseWay:falseWay];
+    
     return resultInfo;
 }
-
 
 #pragma mark - 处理可执行语句
 - (void)dealWithExecStatement:(NSString *)retractNum {
@@ -807,18 +940,24 @@
 - (void)saveQuaternionToList:(NSDictionary *)quaternionDic {
     
     NSMutableDictionary *quaternionInfo = [NSMutableDictionary dictionaryWithDictionary:quaternionDic];
-    // 添加序号
-    [quaternionInfo setObject:@([quaternionList count] + 1) forKey:@"serialNumber"];
+    if (quaternionDic[@"serialNumber"] == nil) {
+        // 添加序号
+        [quaternionInfo setObject:[NSString stringWithFormat:@"%@", @([quaternionList count] + 1)] forKey:@"serialNumber"];
+    }
     
     [quaternionList addObject:quaternionInfo];
 }
 
 // 向 四元式中加入 序号
-- (NSDictionary *)addSerialNumberToQuaternion:(NSDictionary *)quaternionDic {
+- (NSMutableDictionary *)addSerialNumberToQuaternion:(NSDictionary *)quaternionDic {
     NSMutableDictionary *quaternionInfo = [NSMutableDictionary dictionaryWithDictionary:quaternionDic];
     // 添加序号
-    [quaternionInfo setObject:@([quaternionList count] + 1) forKey:@"serialNumber"];
+    [quaternionInfo setObject:[NSString stringWithFormat:@"%@", @([quaternionList count] + 1)] forKey:@"serialNumber"];
     return quaternionInfo;
+}
+
+- (NSString *)gainQuaternionSerialNumber {
+    return [NSString stringWithFormat:@"%lu", (unsigned long)[quaternionList count]];
 }
 
 // 产生一个算术表达式的四元式
@@ -831,9 +970,62 @@
     return [NSString stringWithFormat:@"T%ld", (long)temporaryVarIndex++];
 }
 
+// **** 处理布尔表达式的 四元式
+
 // 布尔表达式的 四元式
 - (NSDictionary *)gainNewBooleanQuaternion:(NSString *)op arg1:(NSString *)arg1 arg2:(NSString *)arg2 {
     return [self gainNewQuaternion:op arg1:arg1 arg2:arg2 result:0];
+}
+
+// 创建 四元式，并返回真假出口
+- (void)createBooleanQuaternion:(NSMutableDictionary *)booleanDic trueWay:(NSString **)realWay falseWay:(NSString **)falseWay {
+    // 创建 四元式，并返回真假出口
+    NSMutableDictionary *newbooleanDic = [self addSerialNumberToQuaternion:booleanDic];
+    [self saveQuaternionToList:newbooleanDic];
+    *realWay = [self gainQuaternionSerialNumber];
+    [rightSemanticQuaternionList addObject:newbooleanDic];
+    
+    NSMutableDictionary *falseDic = [self createNullBooleanDic];
+    falseDic = [self addSerialNumberToQuaternion:falseDic];
+    [self saveQuaternionToList:falseDic];
+    *falseWay = [self gainQuaternionSerialNumber];
+    [falseSemanticQuaternionList addObject:falseDic];
+}
+
+- (NSMutableDictionary *)createNullBooleanDic {
+    return [NSMutableDictionary dictionaryWithDictionary:@{@"op": @"j", @"arg1": @"", @"arg2": @"", @"result": @"0"}];
+}
+
+
+// **** 处理主语句中的回填和更新
+
+// 在if while等语句中回填出口
+- (void)backPatch:(NSMutableArray *)semanticQuaterList{
+    NSMutableDictionary *lastBooleanDic = [semanticQuaterList lastObject];
+    NSString *lastWay = lastBooleanDic[@"result"];
+    NSString *currentWay = [NSString stringWithFormat:@"%@", @([quaternionList count] + 1)];
+    
+    for (NSMutableDictionary *booleanDic in semanticQuaterList) {
+        if ([booleanDic[@"result"] isEqualToString:lastWay]) {
+            booleanDic[@"result"] = currentWay;
+        }
+    }
+    
+    // 回填之后更新四元式列表
+    [self updateQuaternionList:semanticQuaterList];
+}
+
+// 布尔语句完后更新四元式列表
+- (void)updateQuaternionList:(NSMutableArray *)semanticQuaterList  {
+    for (NSDictionary *booleanDic in semanticQuaterList) {
+        for (int i = 0; i < [quaternionList count]; i++) {
+            NSDictionary *qBoolDic = quaternionList[i];
+            if ([qBoolDic[@"serialNumber"] isEqualToString:booleanDic[@"serialNumber"]]) {
+                [quaternionList replaceObjectAtIndex:i withObject:booleanDic];
+                break;
+            }
+        }
+    }
 }
 
 @end
