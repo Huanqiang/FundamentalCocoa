@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>CC2169A7-8D4B-4F1B-83F8-410CC59D25EC</string>
 	<key>IDESourceControlProjectName</key>
-	<string>project</string>
+	<string>FundamentalsCocoa</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>5D12A1E218AB34FD6D2408E919A755881A6F667B</key>
 		<string>https://github.com/861645007/FundamentalCocoa.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>FundamentalsCocoa.xcodeproj/project.xcworkspace</string>
+	<string>FundamentalsCocoa.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>5D12A1E218AB34FD6D2408E919A755881A6F667B</key>
