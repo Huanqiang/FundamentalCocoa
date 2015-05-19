@@ -22,11 +22,13 @@
 #import "FundamentalsResultPanelViewController.h"
 #import "LLFirstForecast.h"
 #import "OperatorPriorateWindowController.h"
+#import "LRWindowController.h"
 
 @interface MenuOperating () {
     FundamentalsResultPanelViewController *fundamentalsResultViewController;
     LLFirstForecast *llFirstForecastViewController;
     OperatorPriorateWindowController *operatorPriorateWindowController;
+    LRWindowController *lrWindowController;
 }
 
 @end
@@ -105,6 +107,14 @@
         operatorPriorateWindowController = [[OperatorPriorateWindowController alloc] initWithWindowNibName:@"OperatorPriorateWindowController"];
     }
     [operatorPriorateWindowController showWindow:self];
+}
+
+#pragma mark - LR分析
+- (IBAction)lrAnalyze:(id)sender {
+    if (!lrWindowController) {
+        lrWindowController = [[LRWindowController alloc] initWithWindowNibName:@"LRWindowController"];
+    }
+    [lrWindowController showWindow:self];
 }
 
 #pragma mark - 语法 分析

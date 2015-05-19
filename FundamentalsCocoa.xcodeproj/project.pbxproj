@@ -11,6 +11,8 @@
 		E66948A21AD4E51600CD9EE5 /* MenuOperating.m in Sources */ = {isa = PBXBuildFile; fileRef = E66948A11AD4E51600CD9EE5 /* MenuOperating.m */; };
 		E680A06C1AD50A820063C2C5 /* CodeTypeClass.m in Sources */ = {isa = PBXBuildFile; fileRef = E680A06B1AD50A820063C2C5 /* CodeTypeClass.m */; };
 		E680A0711AD51D980063C2C5 /* CodeTypeOperating.m in Sources */ = {isa = PBXBuildFile; fileRef = E680A0701AD51D980063C2C5 /* CodeTypeOperating.m */; };
+		E6916D111B0AC02A0061766A /* LRWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6916D0F1B0AC02A0061766A /* LRWindowController.m */; };
+		E6916D121B0AC02A0061766A /* LRWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6916D101B0AC02A0061766A /* LRWindowController.xib */; };
 		E699C88B1AD4253600CD96C8 /* FundamentalsResultPanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E699C8891AD4253600CD96C8 /* FundamentalsResultPanelViewController.m */; };
 		E699C8911AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E699C8901AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib */; };
 		E6A247251AF0821D001B8F02 /* OperatorPriorateWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A247231AF0821D001B8F02 /* OperatorPriorateWindowController.m */; };
@@ -45,6 +47,9 @@
 		E680A06B1AD50A820063C2C5 /* CodeTypeClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodeTypeClass.m; sourceTree = "<group>"; };
 		E680A06F1AD51D980063C2C5 /* CodeTypeOperating.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodeTypeOperating.h; sourceTree = "<group>"; };
 		E680A0701AD51D980063C2C5 /* CodeTypeOperating.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodeTypeOperating.m; sourceTree = "<group>"; };
+		E6916D0E1B0AC02A0061766A /* LRWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LRWindowController.h; sourceTree = "<group>"; };
+		E6916D0F1B0AC02A0061766A /* LRWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LRWindowController.m; sourceTree = "<group>"; };
+		E6916D101B0AC02A0061766A /* LRWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LRWindowController.xib; sourceTree = "<group>"; };
 		E699C8881AD4253600CD96C8 /* FundamentalsResultPanelViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FundamentalsResultPanelViewController.h; sourceTree = "<group>"; };
 		E699C8891AD4253600CD96C8 /* FundamentalsResultPanelViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FundamentalsResultPanelViewController.m; sourceTree = "<group>"; };
 		E699C8901AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FundamentalsResultPanelViewController.xib; sourceTree = "<group>"; };
@@ -118,6 +123,16 @@
 			name = "Code Type ";
 			sourceTree = "<group>";
 		};
+		E6916D0D1B0ABF960061766A /* LR */ = {
+			isa = PBXGroup;
+			children = (
+				E6916D0E1B0AC02A0061766A /* LRWindowController.h */,
+				E6916D0F1B0AC02A0061766A /* LRWindowController.m */,
+				E6916D101B0AC02A0061766A /* LRWindowController.xib */,
+			);
+			name = LR;
+			sourceTree = "<group>";
+		};
 		E6A247211AF07FB4001B8F02 /* Operator Priorate */ = {
 			isa = PBXGroup;
 			children = (
@@ -168,6 +183,7 @@
 		E6F0346B1AD39FA4002B6B65 /* FundamentalsCocoa */ = {
 			isa = PBXGroup;
 			children = (
+				E6916D0D1B0ABF960061766A /* LR */,
 				E6B6AFB31AE63F05008E9C30 /* Function Class */,
 				E602D3A21AE74A7E0050E2A2 /* Grammatical Analysis */,
 				E6B6AFB71AE63FA0008E9C30 /* LL1 */,
@@ -306,6 +322,7 @@
 				E6A247261AF0821D001B8F02 /* OperatorPriorateWindowController.xib in Resources */,
 				E699C8911AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib in Resources */,
 				E6B6AFBC1AE63FEA008E9C30 /* LLFirstForecast.xib in Resources */,
+				E6916D121B0AC02A0061766A /* LRWindowController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,6 +349,7 @@
 				E699C88B1AD4253600CD96C8 /* FundamentalsResultPanelViewController.m in Sources */,
 				E6F034701AD39FA4002B6B65 /* AppDelegate.m in Sources */,
 				E6B6AFBB1AE63FEA008E9C30 /* LLFirstForecast.m in Sources */,
+				E6916D111B0AC02A0061766A /* LRWindowController.m in Sources */,
 				E680A06C1AD50A820063C2C5 /* CodeTypeClass.m in Sources */,
 				E602D3AA1AE74BF70050E2A2 /* GrammaticalAnalysisClass.m in Sources */,
 			);
@@ -431,6 +449,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;

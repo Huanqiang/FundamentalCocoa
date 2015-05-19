@@ -395,6 +395,9 @@
                                         </menuItem>
                                         <menuItem title="LR分析" keyEquivalent="l" id="Z2x-B9-s49">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="lrAnalyze:" target="mb5-bQ-r35" id="Au0-i0-TjU"/>
+                                            </connections>
                                         </menuItem>
                                     </items>
                                 </menu>

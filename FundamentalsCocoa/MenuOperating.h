@@ -17,5 +17,6 @@
 - (IBAction)LLFirstForecastAnalyse:(id)sender;
 - (IBAction)grammaticalAnalysis:(id)sender;
 - (IBAction)operatorPriorate:(id)sender;
+- (IBAction)lrAnalyze:(id)sender;
 
 @end
