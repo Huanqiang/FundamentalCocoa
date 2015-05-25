@@ -18,5 +18,6 @@
 - (IBAction)grammaticalAnalysis:(id)sender;
 - (IBAction)operatorPriorate:(id)sender;
 - (IBAction)lrAnalyze:(id)sender;
+- (IBAction)transformNFAToDFA:(id)sender;
 
 @end

@@ -17,15 +17,20 @@
 		E699C8911AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E699C8901AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib */; };
 		E6A247251AF0821D001B8F02 /* OperatorPriorateWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A247231AF0821D001B8F02 /* OperatorPriorateWindowController.m */; };
 		E6A247261AF0821D001B8F02 /* OperatorPriorateWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6A247241AF0821D001B8F02 /* OperatorPriorateWindowController.xib */; };
+		E6A2CB311B13336F0068590D /* MinDFAObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A2CB301B13336F0068590D /* MinDFAObject.m */; };
 		E6B6AFB61AE63F4C008E9C30 /* FileOperateClass.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B6AFB51AE63F4C008E9C30 /* FileOperateClass.m */; };
 		E6B6AFBB1AE63FEA008E9C30 /* LLFirstForecast.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B6AFB91AE63FEA008E9C30 /* LLFirstForecast.m */; };
 		E6B6AFBC1AE63FEA008E9C30 /* LLFirstForecast.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6B6AFBA1AE63FEA008E9C30 /* LLFirstForecast.xib */; };
+		E6C9D62F1B0B62D6008FA159 /* TransformNFAToDFA.m in Sources */ = {isa = PBXBuildFile; fileRef = E6C9D62D1B0B62D6008FA159 /* TransformNFAToDFA.m */; };
+		E6C9D6301B0B62D6008FA159 /* TransformNFAToDFA.xib in Resources */ = {isa = PBXBuildFile; fileRef = E6C9D62E1B0B62D6008FA159 /* TransformNFAToDFA.xib */; };
+		E6E8CF631B11FCF000094535 /* DFAObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E6E8CF621B11FCF000094535 /* DFAObject.m */; };
 		E6F034701AD39FA4002B6B65 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F0346F1AD39FA4002B6B65 /* AppDelegate.m */; };
 		E6F034721AD39FA4002B6B65 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F034711AD39FA4002B6B65 /* main.m */; };
 		E6F034751AD39FA5002B6B65 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F034741AD39FA5002B6B65 /* ViewController.m */; };
 		E6F034771AD39FA5002B6B65 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E6F034761AD39FA5002B6B65 /* Images.xcassets */; };
 		E6F0347A1AD39FA5002B6B65 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E6F034781AD39FA5002B6B65 /* Main.storyboard */; };
 		E6F034861AD39FA5002B6B65 /* FundamentalsCocoaTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F034851AD39FA5002B6B65 /* FundamentalsCocoaTests.m */; };
+		E6F2B18B1B107BBF00C60476 /* NFAObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E6F2B18A1B107BBF00C60476 /* NFAObject.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,11 +61,18 @@
 		E6A247221AF0821D001B8F02 /* OperatorPriorateWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OperatorPriorateWindowController.h; sourceTree = "<group>"; };
 		E6A247231AF0821D001B8F02 /* OperatorPriorateWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OperatorPriorateWindowController.m; sourceTree = "<group>"; };
 		E6A247241AF0821D001B8F02 /* OperatorPriorateWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OperatorPriorateWindowController.xib; sourceTree = "<group>"; };
+		E6A2CB2F1B13336F0068590D /* MinDFAObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinDFAObject.h; sourceTree = "<group>"; };
+		E6A2CB301B13336F0068590D /* MinDFAObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MinDFAObject.m; sourceTree = "<group>"; };
 		E6B6AFB41AE63F4C008E9C30 /* FileOperateClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileOperateClass.h; path = "Function Class/FileOperateClass.h"; sourceTree = "<group>"; };
 		E6B6AFB51AE63F4C008E9C30 /* FileOperateClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FileOperateClass.m; path = "Function Class/FileOperateClass.m"; sourceTree = "<group>"; };
 		E6B6AFB81AE63FEA008E9C30 /* LLFirstForecast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LLFirstForecast.h; sourceTree = "<group>"; };
 		E6B6AFB91AE63FEA008E9C30 /* LLFirstForecast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LLFirstForecast.m; sourceTree = "<group>"; };
 		E6B6AFBA1AE63FEA008E9C30 /* LLFirstForecast.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LLFirstForecast.xib; sourceTree = "<group>"; };
+		E6C9D62C1B0B62D6008FA159 /* TransformNFAToDFA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformNFAToDFA.h; sourceTree = "<group>"; };
+		E6C9D62D1B0B62D6008FA159 /* TransformNFAToDFA.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TransformNFAToDFA.m; sourceTree = "<group>"; };
+		E6C9D62E1B0B62D6008FA159 /* TransformNFAToDFA.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TransformNFAToDFA.xib; sourceTree = "<group>"; };
+		E6E8CF611B11FCF000094535 /* DFAObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DFAObject.h; sourceTree = "<group>"; };
+		E6E8CF621B11FCF000094535 /* DFAObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DFAObject.m; sourceTree = "<group>"; };
 		E6F034691AD39FA4002B6B65 /* FundamentalsCocoa.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FundamentalsCocoa.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6F0346D1AD39FA4002B6B65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E6F0346E1AD39FA4002B6B65 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -73,6 +85,8 @@
 		E6F0347F1AD39FA5002B6B65 /* FundamentalsCocoaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FundamentalsCocoaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6F034841AD39FA5002B6B65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E6F034851AD39FA5002B6B65 /* FundamentalsCocoaTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FundamentalsCocoaTests.m; sourceTree = "<group>"; };
+		E6F2B1891B107BBF00C60476 /* NFAObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFAObject.h; sourceTree = "<group>"; };
+		E6F2B18A1B107BBF00C60476 /* NFAObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFAObject.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,6 +176,17 @@
 			name = LL1;
 			sourceTree = "<group>";
 		};
+		E6C9D62B1B0B62BB008FA159 /* TransformNFAToDFA */ = {
+			isa = PBXGroup;
+			children = (
+				E6F2B1821B107A1900C60476 /* Object */,
+				E6C9D62C1B0B62D6008FA159 /* TransformNFAToDFA.h */,
+				E6C9D62D1B0B62D6008FA159 /* TransformNFAToDFA.m */,
+				E6C9D62E1B0B62D6008FA159 /* TransformNFAToDFA.xib */,
+			);
+			name = TransformNFAToDFA;
+			sourceTree = "<group>";
+		};
 		E6F034601AD39FA4002B6B65 = {
 			isa = PBXGroup;
 			children = (
@@ -183,6 +208,7 @@
 		E6F0346B1AD39FA4002B6B65 /* FundamentalsCocoa */ = {
 			isa = PBXGroup;
 			children = (
+				E6C9D62B1B0B62BB008FA159 /* TransformNFAToDFA */,
 				E6916D0D1B0ABF960061766A /* LR */,
 				E6B6AFB31AE63F05008E9C30 /* Function Class */,
 				E602D3A21AE74A7E0050E2A2 /* Grammatical Analysis */,
@@ -235,6 +261,19 @@
 				E66948A11AD4E51600CD9EE5 /* MenuOperating.m */,
 			);
 			name = Menu;
+			sourceTree = "<group>";
+		};
+		E6F2B1821B107A1900C60476 /* Object */ = {
+			isa = PBXGroup;
+			children = (
+				E6F2B1891B107BBF00C60476 /* NFAObject.h */,
+				E6F2B18A1B107BBF00C60476 /* NFAObject.m */,
+				E6E8CF611B11FCF000094535 /* DFAObject.h */,
+				E6E8CF621B11FCF000094535 /* DFAObject.m */,
+				E6A2CB2F1B13336F0068590D /* MinDFAObject.h */,
+				E6A2CB301B13336F0068590D /* MinDFAObject.m */,
+			);
+			name = Object;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -318,6 +357,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E6F034771AD39FA5002B6B65 /* Images.xcassets in Resources */,
+				E6C9D6301B0B62D6008FA159 /* TransformNFAToDFA.xib in Resources */,
 				E6F0347A1AD39FA5002B6B65 /* Main.storyboard in Resources */,
 				E6A247261AF0821D001B8F02 /* OperatorPriorateWindowController.xib in Resources */,
 				E699C8911AD426AA00CD96C8 /* FundamentalsResultPanelViewController.xib in Resources */,
@@ -344,14 +384,18 @@
 				E66948A21AD4E51600CD9EE5 /* MenuOperating.m in Sources */,
 				E6F034721AD39FA4002B6B65 /* main.m in Sources */,
 				E6B6AFB61AE63F4C008E9C30 /* FileOperateClass.m in Sources */,
+				E6E8CF631B11FCF000094535 /* DFAObject.m in Sources */,
 				E680A0711AD51D980063C2C5 /* CodeTypeOperating.m in Sources */,
 				E6A247251AF0821D001B8F02 /* OperatorPriorateWindowController.m in Sources */,
 				E699C88B1AD4253600CD96C8 /* FundamentalsResultPanelViewController.m in Sources */,
 				E6F034701AD39FA4002B6B65 /* AppDelegate.m in Sources */,
+				E6F2B18B1B107BBF00C60476 /* NFAObject.m in Sources */,
+				E6C9D62F1B0B62D6008FA159 /* TransformNFAToDFA.m in Sources */,
 				E6B6AFBB1AE63FEA008E9C30 /* LLFirstForecast.m in Sources */,
 				E6916D111B0AC02A0061766A /* LRWindowController.m in Sources */,
 				E680A06C1AD50A820063C2C5 /* CodeTypeClass.m in Sources */,
 				E602D3AA1AE74BF70050E2A2 /* GrammaticalAnalysisClass.m in Sources */,
+				E6A2CB311B13336F0068590D /* MinDFAObject.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

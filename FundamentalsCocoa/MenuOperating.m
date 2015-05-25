@@ -23,12 +23,14 @@
 #import "LLFirstForecast.h"
 #import "OperatorPriorateWindowController.h"
 #import "LRWindowController.h"
+#import "TransformNFAToDFA.h"
 
 @interface MenuOperating () {
     FundamentalsResultPanelViewController *fundamentalsResultViewController;
     LLFirstForecast *llFirstForecastViewController;
     OperatorPriorateWindowController *operatorPriorateWindowController;
     LRWindowController *lrWindowController;
+    TransformNFAToDFA *transformNFAToDFA;
 }
 
 @end
@@ -130,8 +132,6 @@
     }
     [fundamentalsResultViewController showWindow:self];
     
-    
-    
     // 将 语法分析 的正确部分 放到主界面的相应位置
     [fundamentalsResultViewController transformInfoRightToTextView:grammaticalAnalysis.analyzeResultList];
     // 将 语法分析 的错误部分 放到主界面的相应位置
@@ -142,6 +142,14 @@
     // 将语法分析结果保存至文件
     FileOperateClass *fileOperateClass = [[FileOperateClass alloc] init];
     [fileOperateClass saveSymbolToFile:grammaticalAnalysis.symbolAnalyzeResultList];
+}
+
+#pragma mark - NFA、DFA转换
+- (IBAction)transformNFAToDFA:(id)sender {
+    if (!transformNFAToDFA) {
+        transformNFAToDFA = [[TransformNFAToDFA alloc] initWithWindowNibName:@"TransformNFAToDFA"];
+    }
+    [transformNFAToDFA showWindow:self];
 }
 
 

@@ -359,14 +359,11 @@
                                                 <action selector="lexicalAnalysis:" target="mb5-bQ-r35" id="CNS-4m-acg"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="正规式 =&gt; NFA" tag="1" keyEquivalent="r" id="1gl-cF-dgs">
+                                        <menuItem title="正规式=&gt;NFA=&gt;DFA=&gt;最小化" tag="1" keyEquivalent="r" id="1gl-cF-dgs">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES"/>
-                                        </menuItem>
-                                        <menuItem title="NFA =&gt; DFA" keyEquivalent="n" id="atI-Qf-vIB">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
-                                        </menuItem>
-                                        <menuItem title="DFA 最小化" keyEquivalent="d" id="EaT-pX-Ken">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="transformNFAToDFA:" target="mb5-bQ-r35" id="a7d-7j-iUh"/>
+                                            </connections>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -497,7 +494,7 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="C 编译器" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
+                    <window key="window" title="Sample 编译器" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="200" y="300" width="900" height="600"/>
@@ -515,10 +512,10 @@
             </objects>
             <point key="canvasLocation" x="84" y="380"/>
         </scene>
-        <!--C 编译器主界面-->
+        <!--Sample 编译器主界面-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController title="C 编译器主界面" storyboardIdentifier="MainViewController" id="XfG-lQ-9wD" customClass="ViewController" sceneMemberID="viewController">
+                <viewController title="Sample 编译器主界面" storyboardIdentifier="MainViewController" id="XfG-lQ-9wD" customClass="ViewController" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl">
                         <rect key="frame" x="0.0" y="0.0" width="700" height="500"/>
                         <autoresizingMask key="autoresizingMask"/>
