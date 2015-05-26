@@ -75,15 +75,18 @@
     // 首先进行变量处理
     nfaProcessSteps = [NSMutableArray array];
     topOfRegularExp = 0;
-    nfaSerial = 0; // 一开始就预设两个状态1、2；
+    nfaSerial = 1; // 一开始就预设状态1；
 
     // 正式变换
-    NSInteger inWay = 0;
-    NSInteger outWay = 0;
+    NSInteger inWay = 1;
+    NSInteger outWay = 1;
     int regularExpLength = (int)[self.regularExpressionTextField.stringValue length];
     while (topOfRegularExp < regularExpLength) {
         [self createSignalNFA:[self gainFirstCharWithRegularExp] outWay:&outWay inWay:&inWay];
     }
+    
+//    [self saveNFASteps:[self createSignalNilNfaSteps:inWay inWay:1]];
+//    inWay = 1;
     
     // 显示结果
     [self.nFAInfoTableView reloadData];
@@ -107,7 +110,12 @@
         [self dealWithOrSymbol:outWay inWay:inWay];
     }else if ([self isLeftParenthesesSymbol:symbol]) {
         // 判断是不是左括号
+        
         // 如果是左括号 则递归自己
+        // 在递归之前要先保留当前的出入口
+        NSInteger oldInWay = *inWay;
+        NSInteger oldOutWay = *outWay;
+        
         int regularExpLength = (int)[self.regularExpressionTextField.stringValue length];
         while (topOfRegularExp < regularExpLength) {
             NSString *nextSymbol = [self gainFirstCharWithRegularExp];
@@ -118,6 +126,20 @@
                 [self createSignalNFA:nextSymbol outWay:outWay inWay:inWay];
             }
         }
+        
+        // 在括号后面要判断有没有星号的存在
+        if ([self isAsteriskSymbol:[self gainFirstCharWithRegularExp]]) {
+            // 判断是不是星号
+            // 做星号的处理
+            [self dealWithAsteriskSymbol:outWay inWay:inWay];
+        }else {
+            topOfRegularExp --;
+        }
+        
+        // 新旧符号做连接
+        [self saveNFASteps:[self createSignalNilNfaSteps:*inWay inWay:oldOutWay]];
+        // 重新处理新的入口接口
+        *inWay = oldInWay;
     }
 }
 
@@ -135,9 +157,17 @@
             // 新做符号处理
             [self createNfaStepWithSteps:symbol outWay:outWay inWay:inWay];
             
+            if (topOfRegularExp == [self.regularExpressionTextField.stringValue length]) {
+                // 新旧符号做连接
+                [self saveNFASteps:[self createSignalNilNfaSteps:*inWay inWay:oldOutWay]];
+                // 重新处理新的入口接口
+                *inWay = oldInWay;
+                break;
+            }
+            
             if ([self isVarchSymbol:[self gainFirstCharWithRegularExp]]) {
                 // 新旧符号做连接
-                [self saveNFASteps:[self createSignalNilNfaSteps:oldOutWay inWay:*inWay]];
+                [self saveNFASteps:[self createSignalNilNfaSteps:*inWay inWay:oldOutWay]];
                 // 重新处理新的入口接口
                 *inWay = oldInWay;
             }else {
@@ -351,7 +381,7 @@
         
         // 判断这个状态集是不是已经存在于dfaStateCollectionList
         NSInteger isExistName = [self isExistInDFANameList:stateListByVarch];
-        if (isExistName == -1) {
+        if (isExistName == -1 && [stateListByVarch count] != 0) {
             // 如果不存在存在就将产生一个dfa，并将其名字加入到 当前dfa中相应的位置
             DFAObject *dfaObject = [self createNewDFAObejct:stateListByVarch];
             [currentDFA.stateListByVarch setObject:@(dfaObject.collectionName) forKey:varch];
@@ -460,7 +490,16 @@
     for (int i = 0; i < regularExpLength; i++) {
         NSString *symbol = [NSString stringWithFormat:@"%c", [self.regularExpressionTextField.stringValue characterAtIndex:i]];
         if ([self isVarchSymbol:symbol]) {
-            [varchArr addObject:symbol];
+            // 在判断是否已经存在了，存在了就跳过
+            BOOL isExist = NO;
+            for (NSString *repeatSybmol in varchArr) {
+                if ([repeatSybmol isEqualToString:symbol]) {
+                    isExist = YES;
+                }
+            }
+            if (!isExist) {
+                [varchArr addObject:symbol];
+            }
         }
     }
     
@@ -532,8 +571,8 @@
     BOOL isEqual = YES;
     
     for (NSString *varch in varchList) {
-        NSInteger finalStateWithCurrentDFA = [self gainFinalStateInDFASteps:currentDFA.collectionName varch:varch];
-        NSInteger finalStateWithNextDFA = [self gainFinalStateInDFASteps:nextDFA.collectionName varch:varch];
+        NSInteger finalStateWithCurrentDFA = [self gainNextStateInDFASteps:currentDFA.collectionName varch:varch];
+        NSInteger finalStateWithNextDFA = [self gainNextStateInDFASteps:nextDFA.collectionName varch:varch];
         if (finalStateWithCurrentDFA != finalStateWithNextDFA) {
             isEqual = NO;
             break;
@@ -542,21 +581,14 @@
     return isEqual;
 }
 
-// 获取一个dfa通过一个输入符号的最终后继
-- (NSInteger)gainFinalStateInDFASteps:(NSInteger)state varch:(NSString *)varch{
-    while (1) {
-        DFAObject *dfaObject = [self gainDfaObjectInDFASteps:state];
-        NSInteger nextState = [dfaObject.stateListByVarch[varch] integerValue];
-        if (nextState == -1) {
-            return dfaObject.collectionName;
-        }else {
-            // 如果该状态通过一个输入符号的最终后继还是自己，则将自己返回
-            if (nextState == dfaObject.collectionName) {
-                return nextState;
-            }else {
-                state = nextState;
-            }
-        }
+// 获取一个dfa通过一个输入符号的后继
+- (NSInteger)gainNextStateInDFASteps:(NSInteger)state varch:(NSString *)varch{
+    DFAObject *dfaObject = [self gainDfaObjectInDFASteps:state];
+    NSInteger nextState = [dfaObject.stateListByVarch[varch] integerValue];
+    if (nextState == -1) {
+        return dfaObject.collectionName;
+    }else {
+        return nextState;
     }
 }
 
@@ -602,8 +634,7 @@
 
 - (void)gainNewMinDFAStateList {
     NSMutableArray *newMinDFAStateList = [NSMutableArray array];
-    NSInteger minDFAStartState = [[self gainMinDFAStartState] integerValue];
-    MinDFAObject *currentMinDFA = [self findNextMinDFAInProcessSteps:minDFAStartState];
+    MinDFAObject *currentMinDFA = [self findNextMinDFAInProcessSteps:dfaStartState];
     [self findNextStateWithMinDFA:currentMinDFA newMinDFAStateList:newMinDFAStateList];
     
     minDFAProcessSteps = newMinDFAStateList;
@@ -616,8 +647,21 @@
     
     for (NFAObject *dfaStep in dfaProcessSteps) {
         if (dfaStep.inWay == currentDFAState) {
+            
+            BOOL isIncurrentDFA = NO;
+            for (NSNumber *state in currentMinDFA.priStateList) {
+                if ([state isEqualToNumber:@(dfaStep.outWay)]) {
+                    isIncurrentDFA = NO;
+                    break;
+                }
+            }
+            
+            if (isIncurrentDFA) {
+                continue;
+            }
+            
             // 找到nextDFA状态所处的MinDFA
-            MinDFAObject *nextMinDFA = [self findNextMinDFAInProcessSteps:currentDFAState];
+            MinDFAObject *nextMinDFA = [self findNextMinDFAInProcessSteps:dfaStep.outWay];
             // 将该MinDFA加入到
             NFAObject *object = [self createSignalNfaSteps:dfaStep.varch outWay:nextMinDFA.collectionName inWay:currentMinDFA.collectionName];
             
