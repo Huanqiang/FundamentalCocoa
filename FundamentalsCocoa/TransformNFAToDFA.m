@@ -9,6 +9,7 @@
 #import "TransformNFAToDFA.h"
 #import "NFAObject.h"
 #import "DFAObject.h"
+#import "MinDFAObject.h"
 
 @interface TransformNFAToDFA () {
     NSMutableArray *nfaProcessSteps;
@@ -23,8 +24,12 @@
     NSInteger dfaSerial;
     NSMutableArray *dfaEndStateCollection;
     NSMutableArray *dfaNonEndStateCollection;
+    NSArray *dfaSteps;        // 用于最小化的时候时候
+    NSInteger dfaStartState; // 用于最小化的时候时候
     
+    NSArray *minDFASteps;
     NSMutableArray *minDFAProcessSteps;
+    NSInteger minDFASerial;
 }
 
 @property (weak) IBOutlet NSTextField *regularExpressionTextField;
@@ -281,7 +286,8 @@
     [self findNextStateList:firstDFAObject];
     
     // 处理结果
-    self.dfaStartStateCollectionLabel.stringValue = [NSString stringWithFormat:@"%ld", (long)firstDFAObject.collectionName];
+    dfaStartState = firstDFAObject.collectionName;
+    self.dfaStartStateCollectionLabel.stringValue = [NSString stringWithFormat:@"%ld", (long)dfaStartState];
     self.dfaEndStateCollectionLabel.stringValue = [self gainEndState];
     
     [self gainNewDFAStateList];
@@ -315,6 +321,7 @@
         }
     }
     
+    dfaSteps = [NSArray arrayWithArray:dfaProcessSteps];
     dfaProcessSteps = [newDFAStateList copy];
 }
 
@@ -463,19 +470,186 @@
 #pragma mark - DFA最小化
 - (IBAction)tranformDFAToMin:(id)sender {
     // 变量处理
+    minDFASerial = 0;
     minDFAProcessSteps = [NSMutableArray array];
     
+    [self minimumDFA:dfaNonEndStateCollection];
+    [self minimumDFA:dfaEndStateCollection];
     
+    
+    minDFASteps = [NSArray arrayWithArray:minDFAProcessSteps];
+    self.minDFAStartStateCollectionLabel.stringValue = [self gainMinDFAStartState];
+    self.minDFAEndStateCollectionLabel.stringValue = [self gainMinDFAEndState];
+    [self gainNewMinDFAStateList];
+    [self.minDFAInfoTableView reloadData];
 }
 
+// 最小化主函数
 - (void)minimumDFA:(NSArray *)stateCollection {
+    NSMutableArray *repeatedDFAObjects = [NSMutableArray array];
     
+    for (int i = 0; i < [stateCollection count]; i++) {
+        DFAObject *currentDFA = [self gainDfaObjectInDFASteps:[stateCollection[i] integerValue]];
+        // 如果当前DFA和前面的DFA有相同的，就不参与比较
+        if ([self isExistInRepeatedDFAs:currentDFA repeatedDFAObjects:repeatedDFAObjects]) {
+            continue;
+        }
+        
+        // 创建一个MinDFAObject 并将当前状态加入进来
+        MinDFAObject *minDFAObject = [self createMinDFAObject];
+        [minDFAObject addObjectToPriStateList:currentDFA.collectionName];
+        minDFAObject.isEndState = currentDFA.isEndState;
+        
+        // 开始比较
+        for (int j = i + 1; j < [stateCollection count]; j++) {
+            DFAObject *nextDFA = [self gainDfaObjectInDFASteps:[stateCollection[j] integerValue]];
+            
+            // 判断是不是和当前的DFA相同，相同就加入到当前MinDFA中，同时也加入到repeatedDFAObjects中，以便不参与下一次的比较
+            if ([self isEqualToNextDFA:currentDFA nextDFA:nextDFA]) {
+                [minDFAObject addObjectToPriStateList:nextDFA.collectionName];
+                [repeatedDFAObjects addObject:@(nextDFA.collectionName)];
+            }
+        }
+        
+        // 比较完后，将产生的minDFA加入到minDFAProcessSteps中
+        [minDFAProcessSteps addObject:minDFAObject];
+    }
+}
+
+- (BOOL)isExistInRepeatedDFAs:(DFAObject *)dfaObject repeatedDFAObjects:(NSArray *)repeatedDFAObjects {
+    for (NSNumber *state in repeatedDFAObjects) {
+        if ([state isEqualToNumber:@(dfaObject.collectionName)]) {
+            return YES;
+        }
+    }
+    
+    return NO;
 }
 
 
+// 判断两个DFA的后继是否相等
+- (BOOL)isEqualToNextDFA:(DFAObject *)currentDFA nextDFA:(DFAObject *)nextDFA {
+    BOOL isEqual = YES;
+    
+    for (NSString *varch in varchList) {
+        NSInteger finalStateWithCurrentDFA = [self gainFinalStateInDFASteps:currentDFA.collectionName varch:varch];
+        NSInteger finalStateWithNextDFA = [self gainFinalStateInDFASteps:nextDFA.collectionName varch:varch];
+        if (finalStateWithCurrentDFA != finalStateWithNextDFA) {
+            isEqual = NO;
+            break;
+        }
+    }
+    return isEqual;
+}
+
+// 获取一个dfa通过一个输入符号的最终后继
+- (NSInteger)gainFinalStateInDFASteps:(NSInteger)state varch:(NSString *)varch{
+    while (1) {
+        DFAObject *dfaObject = [self gainDfaObjectInDFASteps:state];
+        NSInteger nextState = [dfaObject.stateListByVarch[varch] integerValue];
+        if (nextState == -1) {
+            return dfaObject.collectionName;
+        }else {
+            // 如果该状态通过一个输入符号的最终后继还是自己，则将自己返回
+            if (nextState == dfaObject.collectionName) {
+                return nextState;
+            }else {
+                state = nextState;
+            }
+        }
+    }
+}
+
+// 通过名字获取dfa
+- (DFAObject *)gainDfaObjectInDFASteps:(NSInteger)state {
+    for (DFAObject *dfaObject in dfaSteps) {
+        if (state == dfaObject.collectionName) {
+            return dfaObject;
+        }
+    }
+    return nil;
+}
+
+- (MinDFAObject *)createMinDFAObject {
+    return [[MinDFAObject alloc] initWithName:[self gainMinDFASerial]];
+}
+
+- (NSInteger)gainMinDFASerial {
+    return ++minDFASerial;
+}
 
 
+- (void)saveMinDFA:(MinDFAObject *)minDFAObejct {
+    [minDFAProcessSteps addObject:minDFAObejct];
+}
 
+
+// *** DFA最小化的结果处理
+- (NSString *)gainMinDFAStartState {
+    MinDFAObject *minDFA = [self findNextMinDFAInProcessSteps:dfaStartState];
+    return [NSString stringWithFormat:@"%ld", (long)minDFA.collectionName];
+}
+
+- (NSString *)gainMinDFAEndState {
+    NSMutableString *minDFAEndState = [NSMutableString string];
+    for (MinDFAObject *minDFAObject in minDFASteps) {
+        if (minDFAObject.isEndState) {
+            [minDFAEndState appendFormat:@"%ld ", (long)minDFAObject.collectionName];
+        }
+    }
+    return minDFAEndState;
+}
+
+- (void)gainNewMinDFAStateList {
+    NSMutableArray *newMinDFAStateList = [NSMutableArray array];
+    NSInteger minDFAStartState = [[self gainMinDFAStartState] integerValue];
+    MinDFAObject *currentMinDFA = [self findNextMinDFAInProcessSteps:minDFAStartState];
+    [self findNextStateWithMinDFA:currentMinDFA newMinDFAStateList:newMinDFAStateList];
+    
+    minDFAProcessSteps = newMinDFAStateList;
+}
+
+- (void)findNextStateWithMinDFA:(MinDFAObject *)currentMinDFA newMinDFAStateList:(NSMutableArray *)newMinDFAStateList {
+    // 找到当前的MinDFA的priState集中的第一个元素
+    NSInteger currentDFAState = [[currentMinDFA.priStateList firstObject] integerValue];
+    
+    
+    for (NFAObject *dfaStep in dfaProcessSteps) {
+        if (dfaStep.inWay == currentDFAState) {
+            // 找到nextDFA状态所处的MinDFA
+            MinDFAObject *nextMinDFA = [self findNextMinDFAInProcessSteps:currentDFAState];
+            // 将该MinDFA加入到
+            NFAObject *object = [self createSignalNfaSteps:dfaStep.varch outWay:nextMinDFA.collectionName inWay:currentMinDFA.collectionName];
+            
+            // 如果有重复的，排除掉
+            BOOL isDealed = NO;
+            for (NFAObject *dealedObject in newMinDFAStateList) {
+                if ([dealedObject.varch isEqualToString:object.varch] && dealedObject.inWay == object.inWay && dealedObject.outWay == object.outWay) {
+                    isDealed = YES;
+                }
+            }
+            
+            if (!isDealed) {
+                [newMinDFAStateList addObject:object];
+                
+                // 开始递归，（将 nextDFA 转换成新的 currentDFA）
+                [self findNextStateWithMinDFA:nextMinDFA newMinDFAStateList:newMinDFAStateList];
+            }
+        }
+    }
+}
+
+// 找到DFA状态所处的MinDFA
+- (MinDFAObject *)findNextMinDFAInProcessSteps:(NSInteger)dfaState {
+    for (MinDFAObject *minDFA in minDFASteps) {
+        for (NSNumber *priState in minDFA.priStateList) {
+            if ([priState isEqualToNumber:@(dfaState)]) {
+                return minDFA;
+            }
+        }
+    }
+    return nil;
+}
 
 
 

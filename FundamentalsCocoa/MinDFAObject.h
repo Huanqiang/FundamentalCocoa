@@ -11,6 +11,10 @@
 @interface MinDFAObject : NSObject
 
 @property (nonatomic) NSInteger collectionName;
+@property (nonatomic) BOOL isEndState;
 @property (nonatomic, strong) NSMutableArray *priStateList;
+
+- (id)initWithName:(NSInteger)name;
+- (void)addObjectToPriStateList:(NSInteger)state;
 
 @end
